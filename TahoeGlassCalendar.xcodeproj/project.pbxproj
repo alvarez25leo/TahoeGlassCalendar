@@ -333,6 +333,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "Tahoe Glass Calendar usa AppleScript para abrir la fecha exacta en Calendar.app.";
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Tahoe Glass Calendar necesita acceder a tus eventos para mostrarlos rapidamente desde la barra de menu.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -367,6 +368,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "Tahoe Glass Calendar usa AppleScript para abrir la fecha exacta en Calendar.app.";
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Tahoe Glass Calendar necesita acceder a tus eventos para mostrarlos rapidamente desde la barra de menu.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (

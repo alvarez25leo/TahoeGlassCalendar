@@ -4,50 +4,50 @@
     "Localizable": [
       {
         "comment": "",
-        "key": "Calendar Access Required",
+        "key": "Acceso al calendario",
         "location": {
           "startingColumn": 18,
-          "startingLine": 12
+          "startingLine": 13
         }
       },
       {
         "comment": "",
-        "key": "Allow access to show your events in the menu bar.",
+        "key": "Permite el acceso para mostrar tus eventos desde la barra de menú.",
         "location": {
           "startingColumn": 18,
-          "startingLine": 15
+          "startingLine": 16
         }
       },
       {
         "comment": "",
-        "key": "Allow Calendar Access",
+        "key": "Permitir acceso",
         "location": {
           "startingColumn": 20,
-          "startingLine": 21
+          "startingLine": 22
         }
       },
       {
         "comment": "",
-        "key": "Calendar access is disabled",
+        "key": "Acceso bloqueado",
         "location": {
           "startingColumn": 18,
-          "startingLine": 38
+          "startingLine": 39
         }
       },
       {
         "comment": "",
-        "key": "Enable it in System Settings > Privacy & Security > Calendars.",
+        "key": "Habilítalo en Ajustes del Sistema → Privacidad y seguridad → Calendarios.",
         "location": {
           "startingColumn": 18,
-          "startingLine": 41
+          "startingLine": 42
         }
       },
       {
         "comment": "",
-        "key": "Open System Settings",
+        "key": "Abrir Ajustes del Sistema",
         "location": {
           "startingColumn": 20,
-          "startingLine": 47
+          "startingLine": 48
         }
       }
     ]

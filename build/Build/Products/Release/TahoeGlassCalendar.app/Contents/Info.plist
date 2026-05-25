@@ -44,6 +44,8 @@
 	<string>26.0</string>
 	<key>LSUIElement</key>
 	<true/>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Tahoe Glass Calendar usa AppleScript para abrir la fecha exacta en Calendar.app.</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>Tahoe Glass Calendar necesita acceder a tus eventos para mostrarlos rapidamente desde la barra de menu.</string>
 </dict>

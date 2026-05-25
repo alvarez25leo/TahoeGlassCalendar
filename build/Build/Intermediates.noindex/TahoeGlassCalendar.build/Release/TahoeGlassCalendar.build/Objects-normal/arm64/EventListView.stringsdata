@@ -4,10 +4,34 @@
     "Localizable": [
       {
         "comment": "",
-        "key": "Open Calendar",
+        "key": "Crear evento (⌘N)",
         "location": {
-          "startingColumn": 24,
-          "startingLine": 27
+          "startingColumn": 27,
+          "startingLine": 36
+        }
+      },
+      {
+        "comment": "",
+        "key": "Abrir Calendar en esta fecha (⌘O)",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 49
+        }
+      },
+      {
+        "comment": "",
+        "key": "Crear",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 31
+        }
+      },
+      {
+        "comment": "",
+        "key": "Abrir Calendar",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 44
         }
       }
     ]

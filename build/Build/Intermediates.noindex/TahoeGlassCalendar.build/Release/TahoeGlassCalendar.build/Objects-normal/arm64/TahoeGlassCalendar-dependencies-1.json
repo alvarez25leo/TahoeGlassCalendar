@@ -419,6 +419,13 @@
     "moduleName" : "Security"
   },
   {
+    "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/System\/Library\/Frameworks\/ServiceManagement.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/leonardo\/Documents\/Calendar\/TahoeGlassCalendar\/build\/ModuleCache.noindex\/ServiceManagement-A8B1XQ2AW530J0M7MS0X1TDUZ.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "ServiceManagement"
+  },
+  {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/Spatial\/module.modulemap",
     "clangModulePath" : "\/Users\/leonardo\/Documents\/Calendar\/TahoeGlassCalendar\/build\/ModuleCache.noindex\/Spatial-3H780D7RLNYX82UAROBF5WSI3.pcm",
     "isBridgingHeaderDependency" : false,

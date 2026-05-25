@@ -21,15 +21,22 @@ struct CalendarPanelView: View {
             }
         }
         .frame(width: CalendarTheme.panelWidth)
+        .background(
+            keyboardShortcuts
+                .frame(width: 0, height: 0)
+                .opacity(0)
+        )
     }
 
     private var calendarContent: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 14) {
             CalendarHeaderView(viewModel: viewModel)
             WeekdayHeaderView()
+
             MonthGridView(viewModel: viewModel)
 
             Divider()
+                .opacity(0.5)
 
             EventListView(
                 events: viewModel.selectedDateEvents,
@@ -38,11 +45,48 @@ struct CalendarPanelView: View {
                 },
                 onOpenEvent: { event in
                     viewModel.openEvent(event)
+                },
+                onCreateEvent: {
+                    viewModel.createNewEvent()
                 }
             )
         }
         .task {
-            await viewModel.refresh()
+            await viewModel.refreshAll()
         }
+    }
+
+    @ViewBuilder
+    private var keyboardShortcuts: some View {
+        // Botones invisibles que registran atajos de teclado dentro del popover.
+        VStack {
+            Button("") { Task { await viewModel.goToPreviousMonth() } }
+                .keyboardShortcut(.leftArrow, modifiers: .command)
+
+            Button("") { Task { await viewModel.goToNextMonth() } }
+                .keyboardShortcut(.rightArrow, modifiers: .command)
+
+            Button("") { Task { await viewModel.goToToday() } }
+                .keyboardShortcut("t", modifiers: [])
+
+            Button("") { Task { await viewModel.moveSelection(by: -1) } }
+                .keyboardShortcut(.leftArrow, modifiers: [])
+
+            Button("") { Task { await viewModel.moveSelection(by: 1) } }
+                .keyboardShortcut(.rightArrow, modifiers: [])
+
+            Button("") { Task { await viewModel.moveSelection(by: -7) } }
+                .keyboardShortcut(.upArrow, modifiers: [])
+
+            Button("") { Task { await viewModel.moveSelection(by: 7) } }
+                .keyboardShortcut(.downArrow, modifiers: [])
+
+            Button("") { viewModel.openCalendar() }
+                .keyboardShortcut("o", modifiers: .command)
+
+            Button("") { viewModel.createNewEvent() }
+                .keyboardShortcut("n", modifiers: .command)
+        }
+        .buttonStyle(.plain)
     }
 }

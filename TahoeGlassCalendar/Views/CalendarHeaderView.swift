@@ -5,9 +5,25 @@ struct CalendarHeaderView: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Text(DateFormatters.capitalizedMonthTitle(for: viewModel.visibleMonth))
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(.primary)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(DateFormatters.capitalizedMonthTitle(for: viewModel.visibleMonth))
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .contentTransition(.numericText())
+
+                if viewModel.isLoading {
+                    HStack(spacing: 6) {
+                        ProgressView()
+                            .controlSize(.small)
+                            .scaleEffect(0.6)
+                            .frame(width: 10, height: 10)
+                        Text("Actualizando…")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .transition(.opacity)
+                }
+            }
 
             Spacer()
 
@@ -17,6 +33,7 @@ struct CalendarHeaderView: View {
                 fallbackNavGroup
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: viewModel.isLoading)
     }
 
     @available(macOS 26.0, *)
@@ -34,6 +51,7 @@ struct CalendarHeaderView: View {
                 .buttonStyle(.plain)
                 .glassEffect(.regular.interactive(), in: Circle())
                 .accessibilityLabel("Mes anterior")
+                .keyboardShortcut(.leftArrow, modifiers: .command)
 
                 Button {
                     Task { await viewModel.goToToday() }
@@ -42,10 +60,16 @@ struct CalendarHeaderView: View {
                         .font(.system(size: 12, weight: .semibold))
                         .padding(.horizontal, 12)
                         .frame(height: 26)
+                        .foregroundStyle(viewModel.isViewingCurrentMonth ? .secondary : .primary)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .glassEffect(.regular.interactive(), in: Capsule())
+                .glassEffect(
+                    viewModel.isViewingCurrentMonth
+                        ? .regular.interactive()
+                        : .regular.tint(.accentColor.opacity(0.35)).interactive(),
+                    in: Capsule()
+                )
                 .accessibilityLabel("Ir a hoy")
 
                 Button {
@@ -59,6 +83,7 @@ struct CalendarHeaderView: View {
                 .buttonStyle(.plain)
                 .glassEffect(.regular.interactive(), in: Circle())
                 .accessibilityLabel("Mes siguiente")
+                .keyboardShortcut(.rightArrow, modifiers: .command)
             }
         }
     }
@@ -76,7 +101,13 @@ struct CalendarHeaderView: View {
                     .font(.system(size: 12, weight: .semibold))
                     .padding(.horizontal, 12)
                     .frame(height: 26)
-                    .background(Capsule().fill(.regularMaterial))
+                    .background(
+                        Capsule().fill(
+                            viewModel.isViewingCurrentMonth
+                                ? AnyShapeStyle(.regularMaterial)
+                                : AnyShapeStyle(Color.accentColor.opacity(0.25))
+                        )
+                    )
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Ir a hoy")

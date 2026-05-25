@@ -313,8 +313,10 @@ SWIFT_CLASS("_TtC18TahoeGlassCalendar11AppDelegate")
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
+@class NSMenu;
 SWIFT_CLASS("_TtC18TahoeGlassCalendar19StatusBarController")
-@interface StatusBarController : NSObject
+@interface StatusBarController : NSObject <NSMenuDelegate>
+- (void)menuDidClose:(NSMenu * _Nonnull)menu;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 

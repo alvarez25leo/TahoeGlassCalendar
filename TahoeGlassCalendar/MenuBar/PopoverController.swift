@@ -1,13 +1,16 @@
 import AppKit
 import SwiftUI
+import os
 
 @MainActor
 final class PopoverController {
     private let popover: NSPopover
+    private let viewModel: CalendarViewModel
     private var globalMonitor: Any?
     private var localMonitor: Any?
 
     init(viewModel: CalendarViewModel) {
+        self.viewModel = viewModel
         let rootView = CalendarPanelView(viewModel: viewModel)
 
         self.popover = NSPopover()
@@ -16,6 +19,8 @@ final class PopoverController {
         self.popover.contentSize = NSSize(width: 420, height: 540)
         self.popover.contentViewController = NSHostingController(rootView: rootView)
     }
+
+    var isShown: Bool { popover.isShown }
 
     func toggle(relativeTo button: NSStatusBarButton) {
         if popover.isShown {
@@ -32,8 +37,9 @@ final class PopoverController {
             preferredEdge: .minY
         )
 
-        // El comportamiento .transient a veces no se dispara cuando la app es
-        // LSUIElement y nunca tiene foco. Reforzamos con monitores nativos.
+        // Activamos brevemente la app para que el popover capture eventos de teclado.
+        NSApp.activate(ignoringOtherApps: true)
+
         globalMonitor = NSEvent.addGlobalMonitorForEvents(
             matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]
         ) { [weak self] _ in
@@ -57,11 +63,14 @@ final class PopoverController {
             }
             return event
         }
+
+        AppLogger.popover.debug("Popover shown")
     }
 
     func close() {
         if popover.isShown {
             popover.performClose(nil)
+            AppLogger.popover.debug("Popover closed")
         }
 
         if let monitor = globalMonitor {

@@ -4,10 +4,18 @@
     "Localizable": [
       {
         "comment": "",
-        "key": "No events for this day",
+        "key": "Sin eventos para este día",
         "location": {
           "startingColumn": 18,
-          "startingLine": 9
+          "startingLine": 16
+        }
+      },
+      {
+        "comment": "",
+        "key": "Crear evento",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 22
         }
       }
     ]

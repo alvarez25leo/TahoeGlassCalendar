@@ -1,10 +1,13 @@
 /Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/App/AppDelegate.swift
+/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/App/AppLogger.swift
+/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/App/LaunchAtLoginManager.swift
 /Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/App/TahoeGlassCalendarApp.swift
 /Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/Calendar/AppleCalendarOpener.swift
 /Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/Calendar/CalendarDateUtils.swift
 /Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/Calendar/CalendarMonthBuilder.swift
 /Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/Calendar/CalendarPermissionState.swift
 /Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/Calendar/CalendarService.swift
+/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/Calendar/CalendarServiceProtocol.swift
 /Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/Design/CalendarTheme.swift
 /Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/Design/DateFormatters.swift
 /Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/Design/GlassPanel.swift

@@ -5,49 +5,6 @@
 	<key>logFormatVersion</key>
 	<integer>12</integer>
 	<key>logs</key>
-	<dict>
-		<key>A311DB2C-6D6C-4B9B-AD9E-3ED92E2F85DD</key>
-		<dict>
-			<key>className</key>
-			<string>IDECommandLineBuildLog</string>
-			<key>documentTypeString</key>
-			<string>&lt;nil&gt;</string>
-			<key>domainType</key>
-			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
-			<key>fileName</key>
-			<string>A311DB2C-6D6C-4B9B-AD9E-3ED92E2F85DD.xcactivitylog</string>
-			<key>hasPrimaryLog</key>
-			<true/>
-			<key>primaryObservable</key>
-			<dict>
-				<key>highLevelStatus</key>
-				<string>W</string>
-				<key>totalNumberOfAnalyzerIssues</key>
-				<integer>0</integer>
-				<key>totalNumberOfErrors</key>
-				<integer>0</integer>
-				<key>totalNumberOfTestFailures</key>
-				<integer>0</integer>
-				<key>totalNumberOfWarnings</key>
-				<integer>3</integer>
-			</dict>
-			<key>schemeIdentifier-containerName</key>
-			<string>TahoeGlassCalendar project</string>
-			<key>schemeIdentifier-schemeName</key>
-			<string>TahoeGlassCalendar</string>
-			<key>schemeIdentifier-sharedScheme</key>
-			<integer>1</integer>
-			<key>signature</key>
-			<string>Building project TahoeGlassCalendar with scheme TahoeGlassCalendar and configuration Release</string>
-			<key>timeStartedRecording</key>
-			<real>801417242.397789</real>
-			<key>timeStoppedRecording</key>
-			<real>801417248.537799</real>
-			<key>title</key>
-			<string>Building project TahoeGlassCalendar with scheme TahoeGlassCalendar and configuration Release</string>
-			<key>uniqueIdentifier</key>
-			<string>A311DB2C-6D6C-4B9B-AD9E-3ED92E2F85DD</string>
-		</dict>
-	</dict>
+	<dict/>
 </dict>
 </plist>

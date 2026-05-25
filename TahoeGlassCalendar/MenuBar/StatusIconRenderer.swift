@@ -4,7 +4,30 @@ final class StatusIconRenderer {
     private let canvasSize = NSSize(width: 20, height: 22)
     private let symbolPointSize: CGFloat = 16
 
+    private var cachedWithDot: NSImage?
+    private var cachedWithoutDot: NSImage?
+
     func render(hasDot: Bool) -> NSImage {
+        if hasDot, let cached = cachedWithDot { return cached }
+        if !hasDot, let cached = cachedWithoutDot { return cached }
+
+        let image = drawImage(hasDot: hasDot)
+        if hasDot {
+            cachedWithDot = image
+        } else {
+            cachedWithoutDot = image
+        }
+        return image
+    }
+
+    /// Invalidar el cache cuando cambia la apariencia (no se usa con template
+    /// images, pero útil si se cambia el estilo de render).
+    func invalidate() {
+        cachedWithDot = nil
+        cachedWithoutDot = nil
+    }
+
+    private func drawImage(hasDot: Bool) -> NSImage {
         let image = NSImage(size: canvasSize, flipped: false) { [self] _ in
             let symbolConfig = NSImage.SymbolConfiguration(
                 pointSize: symbolPointSize,

@@ -4,10 +4,18 @@
     "Localizable": [
       {
         "comment": "",
+        "key": "Actualizando…",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 20
+        }
+      },
+      {
+        "comment": "",
         "key": "Mes anterior",
         "location": {
           "startingColumn": 37,
-          "startingLine": 36
+          "startingLine": 53
         }
       },
       {
@@ -15,7 +23,7 @@
         "key": "Ir a hoy",
         "location": {
           "startingColumn": 37,
-          "startingLine": 49
+          "startingLine": 73
         }
       },
       {
@@ -23,7 +31,7 @@
         "key": "Mes siguiente",
         "location": {
           "startingColumn": 37,
-          "startingLine": 61
+          "startingLine": 85
         }
       },
       {
@@ -31,7 +39,7 @@
         "key": "Hoy",
         "location": {
           "startingColumn": 26,
-          "startingLine": 41
+          "startingLine": 59
         }
       },
       {
@@ -39,7 +47,7 @@
         "key": "Ir a hoy",
         "location": {
           "startingColumn": 33,
-          "startingLine": 82
+          "startingLine": 113
         }
       },
       {
@@ -47,7 +55,7 @@
         "key": "Hoy",
         "location": {
           "startingColumn": 22,
-          "startingLine": 75
+          "startingLine": 100
         }
       }
     ]

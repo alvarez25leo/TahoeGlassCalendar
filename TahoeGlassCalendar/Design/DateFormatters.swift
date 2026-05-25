@@ -17,6 +17,13 @@ enum DateFormatters {
         return formatter
     }()
 
+    static let monthKey: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM"
+        return formatter
+    }()
+
     static let selectedDateLong: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = spanish

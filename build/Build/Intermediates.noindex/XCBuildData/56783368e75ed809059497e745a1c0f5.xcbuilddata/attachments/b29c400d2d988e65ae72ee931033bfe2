@@ -13,6 +13,16 @@
     "llvm-bc" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/AppDelegate.bc",
     "object" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/AppDelegate.o"
   },
+  "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/App/AppLogger.swift" : {
+    "index-unit-output-path" : "/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/AppLogger.o",
+    "llvm-bc" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/AppLogger.bc",
+    "object" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/AppLogger.o"
+  },
+  "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/App/LaunchAtLoginManager.swift" : {
+    "index-unit-output-path" : "/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/LaunchAtLoginManager.o",
+    "llvm-bc" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/LaunchAtLoginManager.bc",
+    "object" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/LaunchAtLoginManager.o"
+  },
   "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/App/TahoeGlassCalendarApp.swift" : {
     "index-unit-output-path" : "/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/TahoeGlassCalendarApp.o",
     "llvm-bc" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/TahoeGlassCalendarApp.bc",
@@ -42,6 +52,11 @@
     "index-unit-output-path" : "/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/CalendarService.o",
     "llvm-bc" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/CalendarService.bc",
     "object" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/CalendarService.o"
+  },
+  "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/Calendar/CalendarServiceProtocol.swift" : {
+    "index-unit-output-path" : "/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/CalendarServiceProtocol.o",
+    "llvm-bc" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/CalendarServiceProtocol.bc",
+    "object" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/CalendarServiceProtocol.o"
   },
   "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/Design/CalendarTheme.swift" : {
     "index-unit-output-path" : "/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/CalendarTheme.o",
