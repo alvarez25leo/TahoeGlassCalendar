@@ -17,6 +17,11 @@ final class PopoverController {
         self.popover.behavior = .transient
         self.popover.animates = true
 
+        // Oculta la flecha del NSPopover para que el glassEffect no muestre un
+        // corte visible en la base del anchor. Es un KVC privado estable usado
+        // por muchas menu bar apps (Bartender, Things, etc.).
+        self.popover.setValue(true, forKey: "shouldHideAnchor")
+
         let hosting = NSHostingController(rootView: rootView)
         // Hace que el popover siempre tome el tamaño intrinseco del SwiftUI view
         // -> sin espacio en blanco al abrir, sin necesidad de setear contentSize fijo.
