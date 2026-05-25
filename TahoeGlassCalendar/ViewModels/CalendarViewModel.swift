@@ -64,9 +64,8 @@ final class CalendarViewModel: ObservableObject {
             return
         }
 
-        isLoading = true
-        defer { isLoading = false }
-
+        // No toggleamos isLoading aquí para evitar layout shifts en la UI.
+        // El fetch corre en Task.detached (no bloquea main actor).
         let gridRange = CalendarDateUtils.gridRange(for: visibleMonth, calendar: workCalendar)
         let events = await calendarService.fetchEvents(from: gridRange.start, to: gridRange.end)
         gridEvents = events

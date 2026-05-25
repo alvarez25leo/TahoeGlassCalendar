@@ -5,25 +5,9 @@ struct CalendarHeaderView: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(DateFormatters.capitalizedMonthTitle(for: viewModel.visibleMonth))
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(.primary)
-                    .contentTransition(.numericText())
-
-                if viewModel.isLoading {
-                    HStack(spacing: 6) {
-                        ProgressView()
-                            .controlSize(.small)
-                            .scaleEffect(0.6)
-                            .frame(width: 10, height: 10)
-                        Text("Actualizando…")
-                            .font(.system(size: 10))
-                            .foregroundStyle(.tertiary)
-                    }
-                    .transition(.opacity)
-                }
-            }
+            Text(DateFormatters.capitalizedMonthTitle(for: viewModel.visibleMonth))
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(.primary)
 
             Spacer()
 
@@ -33,7 +17,6 @@ struct CalendarHeaderView: View {
                 fallbackNavGroup
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: viewModel.isLoading)
     }
 
     @available(macOS 26.0, *)

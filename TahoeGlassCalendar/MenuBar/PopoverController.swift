@@ -16,8 +16,12 @@ final class PopoverController {
         self.popover = NSPopover()
         self.popover.behavior = .transient
         self.popover.animates = true
-        self.popover.contentSize = NSSize(width: 420, height: 540)
-        self.popover.contentViewController = NSHostingController(rootView: rootView)
+
+        let hosting = NSHostingController(rootView: rootView)
+        // Hace que el popover siempre tome el tamaño intrinseco del SwiftUI view
+        // -> sin espacio en blanco al abrir, sin necesidad de setear contentSize fijo.
+        hosting.sizingOptions = [.preferredContentSize, .intrinsicContentSize]
+        self.popover.contentViewController = hosting
     }
 
     var isShown: Bool { popover.isShown }
