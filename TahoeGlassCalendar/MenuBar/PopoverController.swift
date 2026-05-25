@@ -40,11 +40,28 @@ final class PopoverController {
     }
 
     func show(relativeTo button: NSStatusBarButton) {
+        // Encogemos el rect de anclaje desde abajo: el popover se ancla al borde
+        // minY del rect, asi que subir ese borde acerca el panel a la menu bar.
+        let anchor = NSRect(
+            x: button.bounds.origin.x,
+            y: button.bounds.origin.y + 6,
+            width: button.bounds.width,
+            height: max(button.bounds.height - 6, 1)
+        )
+
         popover.show(
-            relativeTo: button.bounds,
+            relativeTo: anchor,
             of: button,
             preferredEdge: .minY
         )
+
+        // Subimos la ventana del popover 10px adicionales una vez mostrada,
+        // para que quede mas pegada a la menu bar.
+        if let popoverWindow = popover.contentViewController?.view.window {
+            var frame = popoverWindow.frame
+            frame.origin.y += 7
+            popoverWindow.setFrameOrigin(frame.origin)
+        }
 
         // Activamos brevemente la app para que el popover capture eventos de teclado.
         NSApp.activate(ignoringOtherApps: true)
