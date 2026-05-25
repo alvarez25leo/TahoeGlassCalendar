@@ -1,0 +1,16 @@
+{
+  "source": "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/Views/DayCellView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 10
+        }
+      }
+    ]
+  },
+  "version": 1
+}

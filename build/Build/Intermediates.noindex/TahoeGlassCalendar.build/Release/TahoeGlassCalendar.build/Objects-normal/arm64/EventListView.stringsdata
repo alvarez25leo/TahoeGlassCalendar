@@ -1,0 +1,16 @@
+{
+  "source": "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/Views/EventListView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Open Calendar",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 27
+        }
+      }
+    ]
+  },
+  "version": 1
+}

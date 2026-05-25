@@ -1,0 +1,12 @@
+{
+  "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/App/AppDelegate.swift" : {
+    "abi-baseline-json" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/TahoeGlassCalendar.abi.json",
+    "const-values" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/TahoeGlassCalendar-primary.swiftconstvalues",
+    "dependencies" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/TahoeGlassCalendar-primary.d",
+    "diagnostics" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/TahoeGlassCalendar-primary.dia",
+    "objc-header" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/TahoeGlassCalendar-Swift.h",
+    "swiftdoc" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/TahoeGlassCalendar.swiftdoc",
+    "swiftmodule" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/TahoeGlassCalendar.swiftmodule",
+    "swiftsourceinfo" : "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/build/Build/Intermediates.noindex/TahoeGlassCalendar.build/Release/TahoeGlassCalendar.build/Objects-normal/arm64/TahoeGlassCalendar.swiftsourceinfo"
+  }
+}

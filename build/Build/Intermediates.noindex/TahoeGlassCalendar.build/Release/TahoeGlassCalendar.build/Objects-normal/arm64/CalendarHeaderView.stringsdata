@@ -1,0 +1,56 @@
+{
+  "source": "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/Views/CalendarHeaderView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Mes anterior",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 36
+        }
+      },
+      {
+        "comment": "",
+        "key": "Ir a hoy",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 49
+        }
+      },
+      {
+        "comment": "",
+        "key": "Mes siguiente",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 61
+        }
+      },
+      {
+        "comment": "",
+        "key": "Hoy",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 41
+        }
+      },
+      {
+        "comment": "",
+        "key": "Ir a hoy",
+        "location": {
+          "startingColumn": 33,
+          "startingLine": 82
+        }
+      },
+      {
+        "comment": "",
+        "key": "Hoy",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 75
+        }
+      }
+    ]
+  },
+  "version": 1
+}
