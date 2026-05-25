@@ -51,6 +51,11 @@ final class StatusBarController: NSObject, NSMenuDelegate {
     // MARK: - Setup
 
     private func configureStatusItem() {
+        // autosaveName hace que macOS recuerde la posicion en que el usuario
+        // colocó el icono (Cmd + drag). Sin esto, vuelve al final cada launch.
+        statusItem.autosaveName = "TahoeGlassCalendarStatusItem"
+        statusItem.behavior = .removalAllowed
+
         guard let button = statusItem.button else { return }
 
         button.image = iconRenderer.render(hasDot: false)
