@@ -3,6 +3,7 @@ import SwiftUI
 struct DayCellView: View {
     let day: CalendarDayItem
     let onSelect: () -> Void
+    let onRightClick: () -> Void
 
     @State private var isHovering = false
 
@@ -33,6 +34,12 @@ struct DayCellView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .overlay(
+            RightClickCatcher(onRightClick: {
+                onSelect()
+                onRightClick()
+            })
+        )
         .onHover { hovering in
             isHovering = hovering
         }

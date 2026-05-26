@@ -1,0 +1,136 @@
+{
+  "source": "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/Views/QuickEventComposerView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Título",
+        "location": {
+          "startingColumn": 19,
+          "startingLine": 135
+        }
+      },
+      {
+        "comment": "",
+        "key": "Editar evento",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 113
+        }
+      },
+      {
+        "comment": "",
+        "key": "Nuevo evento",
+        "location": {
+          "startingColumn": 48,
+          "startingLine": 113
+        }
+      },
+      {
+        "comment": "",
+        "key": "Agregar ubicación",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 152
+        }
+      },
+      {
+        "comment": "",
+        "key": "Todo el día",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 168
+        }
+      },
+      {
+        "comment": "",
+        "key": "Inicio",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 188
+        }
+      },
+      {
+        "comment": "",
+        "key": "Fin",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 200
+        }
+      },
+      {
+        "comment": "",
+        "key": "Inicio",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 210
+        }
+      },
+      {
+        "comment": "",
+        "key": "Inicio",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 216
+        }
+      },
+      {
+        "comment": "",
+        "key": "Fin",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 233
+        }
+      },
+      {
+        "comment": "",
+        "key": "Fin",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 239
+        }
+      },
+      {
+        "comment": "",
+        "key": "· %@",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 268
+        }
+      },
+      {
+        "comment": "",
+        "key": "Notas, URL…",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 346
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancelar",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 370
+        }
+      },
+      {
+        "comment": "",
+        "key": "Guardar",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 388
+        }
+      },
+      {
+        "comment": "",
+        "key": "Crear",
+        "location": {
+          "startingColumn": 50,
+          "startingLine": 388
+        }
+      }
+    ]
+  },
+  "version": 1
+}

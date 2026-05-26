@@ -1,5 +1,24 @@
 {
   "source": "/Users/leonardo/Documents/Calendar/TahoeGlassCalendar/TahoeGlassCalendar/Views/EventRowView.swift",
-  "tables": {},
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Editar",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 65
+        }
+      },
+      {
+        "comment": "",
+        "key": "Eliminar",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 71
+        }
+      }
+    ]
+  },
   "version": 1
 }

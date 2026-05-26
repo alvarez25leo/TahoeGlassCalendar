@@ -280,6 +280,7 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 #pragma clang diagnostic ignored "-Watimport-in-framework-header"
 #endif
 @import AppKit;
+@import Foundation;
 @import ObjectiveC;
 #endif
 
@@ -309,6 +310,18 @@ SWIFT_CLASS("_TtC18TahoeGlassCalendar11AppDelegate")
 - (void)applicationDidFinishLaunching:(NSNotification * _Nonnull)notification;
 - (void)applicationWillTerminate:(NSNotification * _Nonnull)notification;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
+@class NSEvent;
+@class NSCoder;
+SWIFT_CLASS("_TtC18TahoeGlassCalendar16RightClickNSView")
+@interface RightClickNSView : NSView
+- (void)rightMouseDown:(NSEvent * _Nonnull)event;
+/// Solo “atrapa” el hit cuando el evento actual es right-click; el resto se
+/// deja pasar al SwiftUI Button por debajo.
+- (NSView * _Nullable)hitTest:(NSPoint)point SWIFT_WARN_UNUSED_RESULT;
+- (nonnull instancetype)initWithFrame:(NSRect)frameRect OBJC_DESIGNATED_INITIALIZER;
+- (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)coder OBJC_DESIGNATED_INITIALIZER;
 @end
 
 @class NSMenu;

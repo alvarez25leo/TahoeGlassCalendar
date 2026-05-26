@@ -7,7 +7,7 @@
         "key": "Sin eventos para este día",
         "location": {
           "startingColumn": 18,
-          "startingLine": 35
+          "startingLine": 40
         }
       },
       {
@@ -15,7 +15,7 @@
         "key": "Crear evento (⌘N)",
         "location": {
           "startingColumn": 23,
-          "startingLine": 71
+          "startingLine": 76
         }
       },
       {
@@ -23,7 +23,7 @@
         "key": "Abrir Calendar en esta fecha (⌘O)",
         "location": {
           "startingColumn": 23,
-          "startingLine": 83
+          "startingLine": 88
         }
       },
       {
@@ -31,7 +31,7 @@
         "key": "Crear",
         "location": {
           "startingColumn": 27,
-          "startingLine": 62
+          "startingLine": 67
         }
       },
       {
@@ -39,7 +39,7 @@
         "key": "Abrir",
         "location": {
           "startingColumn": 27,
-          "startingLine": 74
+          "startingLine": 79
         }
       },
       {
@@ -47,7 +47,7 @@
         "key": "Crear evento (⌘N)",
         "location": {
           "startingColumn": 19,
-          "startingLine": 98
+          "startingLine": 103
         }
       },
       {
@@ -55,7 +55,7 @@
         "key": "Abrir Calendar en esta fecha (⌘O)",
         "location": {
           "startingColumn": 19,
-          "startingLine": 108
+          "startingLine": 113
         }
       },
       {
@@ -63,7 +63,7 @@
         "key": "Crear",
         "location": {
           "startingColumn": 23,
-          "startingLine": 91
+          "startingLine": 96
         }
       },
       {
@@ -71,7 +71,7 @@
         "key": "Abrir",
         "location": {
           "startingColumn": 23,
-          "startingLine": 101
+          "startingLine": 106
         }
       }
     ]

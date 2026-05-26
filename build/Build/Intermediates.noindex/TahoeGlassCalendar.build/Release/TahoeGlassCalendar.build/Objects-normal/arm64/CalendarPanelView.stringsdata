@@ -4,23 +4,15 @@
     "Localizable": [
       {
         "comment": "",
-        "key": "",
+        "key": "¿Eliminar este evento?",
         "location": {
-          "startingColumn": 20,
-          "startingLine": 63
+          "startingColumn": 13,
+          "startingLine": 62
         }
       },
       {
         "comment": "",
-        "key": "",
-        "location": {
-          "startingColumn": 20,
-          "startingLine": 66
-        }
-      },
-      {
-        "comment": "",
-        "key": "",
+        "key": "Cancelar",
         "location": {
           "startingColumn": 20,
           "startingLine": 69
@@ -28,10 +20,18 @@
       },
       {
         "comment": "",
-        "key": "",
+        "key": "Eliminar",
         "location": {
           "startingColumn": 20,
-          "startingLine": 72
+          "startingLine": 70
+        }
+      },
+      {
+        "comment": "",
+        "key": "Se borrará \"%@\" de tu calendario. Esta acción no se puede deshacer.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 74
         }
       },
       {
@@ -39,7 +39,7 @@
         "key": "",
         "location": {
           "startingColumn": 20,
-          "startingLine": 75
+          "startingLine": 102
         }
       },
       {
@@ -47,7 +47,7 @@
         "key": "",
         "location": {
           "startingColumn": 20,
-          "startingLine": 78
+          "startingLine": 105
         }
       },
       {
@@ -55,7 +55,7 @@
         "key": "",
         "location": {
           "startingColumn": 20,
-          "startingLine": 81
+          "startingLine": 108
         }
       },
       {
@@ -63,7 +63,7 @@
         "key": "",
         "location": {
           "startingColumn": 20,
-          "startingLine": 84
+          "startingLine": 111
         }
       },
       {
@@ -71,7 +71,39 @@
         "key": "",
         "location": {
           "startingColumn": 20,
-          "startingLine": 87
+          "startingLine": 114
+        }
+      },
+      {
+        "comment": "",
+        "key": "",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 117
+        }
+      },
+      {
+        "comment": "",
+        "key": "",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 120
+        }
+      },
+      {
+        "comment": "",
+        "key": "",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 123
+        }
+      },
+      {
+        "comment": "",
+        "key": "",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 126
         }
       }
     ]

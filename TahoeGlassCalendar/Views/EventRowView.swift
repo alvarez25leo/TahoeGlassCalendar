@@ -3,6 +3,8 @@ import SwiftUI
 struct EventRowView: View {
     let event: CalendarEventItem
     let onTap: () -> Void
+    let onEdit: () -> Void
+    let onDelete: () -> Void
 
     @State private var isHovering = false
 
@@ -56,6 +58,19 @@ struct EventRowView: View {
             isHovering = hovering
         }
         .animation(.easeInOut(duration: 0.12), value: isHovering)
+        .contextMenu {
+            Button {
+                onEdit()
+            } label: {
+                Label("Editar", systemImage: "pencil")
+            }
+
+            Button(role: .destructive) {
+                onDelete()
+            } label: {
+                Label("Eliminar", systemImage: "trash")
+            }
+        }
     }
 
     private var timeLabel: String {

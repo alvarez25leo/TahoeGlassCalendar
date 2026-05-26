@@ -5,6 +5,8 @@ struct EventListView: View {
     let onOpenCalendar: () -> Void
     let onOpenEvent: (CalendarEventItem) -> Void
     let onCreateEvent: () -> Void
+    let onEditEvent: (CalendarEventItem) -> Void
+    let onDeleteEvent: (CalendarEventItem) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -14,9 +16,12 @@ struct EventListView: View {
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 2) {
                         ForEach(events) { event in
-                            EventRowView(event: event) {
-                                onOpenEvent(event)
-                            }
+                            EventRowView(
+                                event: event,
+                                onTap: { onOpenEvent(event) },
+                                onEdit: { onEditEvent(event) },
+                                onDelete: { onDeleteEvent(event) }
+                            )
                         }
                     }
                 }

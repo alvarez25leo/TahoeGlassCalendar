@@ -15,6 +15,16 @@ final class CalendarViewModel: ObservableObject {
     @Published private(set) var nextTodayEvent: CalendarEventItem?
     @Published private(set) var isLoading: Bool = false
 
+    @Published private(set) var availableCalendars: [CalendarSource] = []
+    @Published var quickAddDate: Date?
+    @Published var quickAddError: String?
+    @Published var editingEvent: CalendarEventItem?
+    @Published var pendingDeleteEvent: CalendarEventItem?
+
+    var composerIsPresented: Bool {
+        quickAddDate != nil
+    }
+
     private let calendarService: CalendarServiceProtocol
     private let monthBuilder: CalendarMonthBuilder
     private let opener: AppleCalendarOpener
@@ -43,6 +53,7 @@ final class CalendarViewModel: ObservableObject {
         }
 
         if permissionState == .fullAccess {
+            availableCalendars = calendarService.availableCalendars()
             await refreshAll()
         }
     }
@@ -52,20 +63,17 @@ final class CalendarViewModel: ObservableObject {
         permissionState = granted ? .fullAccess : calendarService.authorizationStatus()
 
         if granted {
+            availableCalendars = calendarService.availableCalendars()
             await refreshAll()
         }
     }
 
-    /// Refresh completo: trae eventos del grid (42 días) y reconstruye todo.
-    /// Llamar al abrir el popover y al cambiar de mes.
     func refreshAll() async {
         guard permissionState == .fullAccess else {
             rebuildTodayIndicator(from: nil)
             return
         }
 
-        // No toggleamos isLoading aquí para evitar layout shifts en la UI.
-        // El fetch corre en Task.detached (no bloquea main actor).
         let gridRange = CalendarDateUtils.gridRange(for: visibleMonth, calendar: workCalendar)
         let events = await calendarService.fetchEvents(from: gridRange.start, to: gridRange.end)
         gridEvents = events
@@ -76,8 +84,6 @@ final class CalendarViewModel: ObservableObject {
         AppLogger.calendar.debug("refreshAll: \(events.count) events in grid range")
     }
 
-    /// Refresh barato: solo el conteo/indicador de "hoy".
-    /// Llamar cada 60 s y en NSCalendarDayChanged.
     func refreshTodayIndicator() async {
         guard permissionState == .fullAccess else {
             rebuildTodayIndicator(from: nil)
@@ -94,14 +100,8 @@ final class CalendarViewModel: ObservableObject {
         applyTodayIndicator(events: events)
     }
 
-    /// Forzar refresh cuando cambia el día calendario (cruce de medianoche).
     func handleDayChange() async {
         AppLogger.calendar.info("Day changed: re-rendering")
-        // Rebuild local arrays con un selectedDate "hoy" si el visibleMonth es el actual.
-        if workCalendar.isDateInToday(selectedDate) == false &&
-           workCalendar.isDate(visibleMonth, equalTo: Date(), toGranularity: .month) {
-            // mantenemos selectedDate pero forzamos rebuild para mover el "isToday".
-        }
         await refreshAll()
     }
 
@@ -131,12 +131,10 @@ final class CalendarViewModel: ObservableObject {
         rebuildSelectedDateEvents()
     }
 
-    /// Mover el día seleccionado N días (para flechas del teclado).
     func moveSelection(by days: Int) async {
         guard let newDate = workCalendar.date(byAdding: .day, value: days, to: selectedDate) else { return }
         selectedDate = newDate
 
-        // Si caímos fuera del mes visible, navegar.
         if !workCalendar.isDate(newDate, equalTo: visibleMonth, toGranularity: .month) {
             visibleMonth = newDate
             await refreshAll()
@@ -158,13 +156,119 @@ final class CalendarViewModel: ObservableObject {
         opener.openCalendar(at: event.startDate)
     }
 
-    func createNewEvent() {
-        opener.createNewEvent(at: selectedDate)
-    }
-
     var isViewingCurrentMonth: Bool {
         workCalendar.isDate(visibleMonth, equalTo: Date(), toGranularity: .month)
     }
+
+    // MARK: - Quick add
+
+    func presentQuickAdd(on date: Date) {
+        // Refrescamos los calendarios en caso de cambios externos.
+        if permissionState == .fullAccess {
+            availableCalendars = calendarService.availableCalendars()
+        }
+        editingEvent = nil
+        quickAddError = nil
+        quickAddDate = date
+    }
+
+    func presentEdit(for event: CalendarEventItem) {
+        if permissionState == .fullAccess {
+            availableCalendars = calendarService.availableCalendars()
+        }
+        quickAddError = nil
+        editingEvent = event
+        quickAddDate = event.startDate
+    }
+
+    func dismissQuickAdd() {
+        quickAddDate = nil
+        editingEvent = nil
+        quickAddError = nil
+    }
+
+    func requestDelete(_ event: CalendarEventItem) {
+        pendingDeleteEvent = event
+    }
+
+    func cancelDelete() {
+        pendingDeleteEvent = nil
+    }
+
+    func confirmDelete() async {
+        guard let event = pendingDeleteEvent else { return }
+        pendingDeleteEvent = nil
+
+        guard let id = event.eventIdentifier ?? Optional(event.id) else { return }
+
+        do {
+            try await calendarService.deleteEvent(eventID: id)
+            await refreshAll()
+        } catch {
+            quickAddError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            AppLogger.calendar.error("Delete failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    func createNewEvent() {
+        // Botón "Crear" del footer: abre el composer sobre la fecha seleccionada.
+        presentQuickAdd(on: defaultQuickAddDate(for: selectedDate))
+    }
+
+    /// Si el usuario clickea derecho un día, el composer arranca con hora 9-10 am
+    /// (o ahora+1h si es hoy y son después de las 9). Solo afecta la sugerencia inicial.
+    func defaultQuickAddDate(for date: Date) -> Date {
+        let calendar = workCalendar
+        if calendar.isDateInToday(date) {
+            let now = Date()
+            // Redondea a la próxima media hora.
+            var comps = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: now)
+            let minute = comps.minute ?? 0
+            comps.minute = minute < 30 ? 30 : 0
+            if minute >= 30 {
+                comps.hour = (comps.hour ?? 0) + 1
+            }
+            return calendar.date(from: comps) ?? date
+        } else {
+            var comps = calendar.dateComponents([.year, .month, .day], from: date)
+            comps.hour = 9
+            comps.minute = 0
+            return calendar.date(from: comps) ?? date
+        }
+    }
+
+    func defaultCalendarID() -> String? {
+        if let defaultID = calendarService.defaultCalendarID(),
+           availableCalendars.contains(where: { $0.id == defaultID }) {
+            return defaultID
+        }
+        return availableCalendars.first?.id
+    }
+
+    func saveDraft(_ draft: NewEventDraft) async -> Bool {
+        guard draft.isValid else {
+            quickAddError = "Falta el título del evento."
+            return false
+        }
+        do {
+            if let editing = editingEvent, let id = editing.eventIdentifier ?? Optional(editing.id) {
+                try await calendarService.updateEvent(eventID: id, draft: draft)
+            } else {
+                _ = try await calendarService.createEvent(draft)
+            }
+            quickAddError = nil
+            quickAddDate = nil
+            editingEvent = nil
+            await refreshAll()
+            return true
+        } catch {
+            quickAddError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            AppLogger.calendar.error("saveDraft failed: \(error.localizedDescription, privacy: .public)")
+            return false
+        }
+    }
+
+    // MARK: - Rebuild helpers
 
     private func rebuildDays() {
         days = monthBuilder.buildDays(
@@ -185,8 +289,6 @@ final class CalendarViewModel: ObservableObject {
             }
     }
 
-    /// Usa el cache local (gridEvents) si "hoy" cae dentro del rango.
-    /// Si no, deja en cero (refresh asincrónico lo arreglará en background).
     private func rebuildTodayIndicator(from events: [CalendarEventItem]?) {
         guard permissionState == .fullAccess else {
             applyTodayIndicator(events: [])
@@ -203,7 +305,6 @@ final class CalendarViewModel: ObservableObject {
         } else if let cache = todayCache, workCalendar.isDate(cache.0, inSameDayAs: today) {
             applyTodayIndicator(events: cache.1)
         } else {
-            // No data yet; mantener valores previos pero disparar fetch.
             Task { [weak self] in
                 await self?.refreshTodayIndicator()
             }

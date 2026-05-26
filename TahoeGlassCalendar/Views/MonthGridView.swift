@@ -11,9 +11,14 @@ struct MonthGridView: View {
     var body: some View {
         LazyVGrid(columns: columns, spacing: 4) {
             ForEach(viewModel.days) { day in
-                DayCellView(day: day) {
-                    viewModel.selectDate(day.date)
-                }
+                DayCellView(
+                    day: day,
+                    onSelect: { viewModel.selectDate(day.date) },
+                    onRightClick: {
+                        let suggested = viewModel.defaultQuickAddDate(for: day.date)
+                        viewModel.presentQuickAdd(on: suggested)
+                    }
+                )
             }
         }
     }
