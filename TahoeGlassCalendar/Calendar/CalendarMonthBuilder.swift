@@ -17,19 +17,46 @@ final class CalendarMonthBuilder {
         let gridRange = CalendarDateUtils.gridRange(for: visibleMonth, calendar: calendar)
         let gridStart = gridRange.start
 
-        // Index eventos por dayID: para cada día listamos colores únicos (hasta 3).
+        // Para cada evento, listamos TODOS los dias que cubre (multi-day support).
+        // hasta 3 colores únicos por día.
         var colorsByDay: [String: [CGColor]] = [:]
+        let fallbackColor = CGColor(red: 0, green: 0.48, blue: 1, alpha: 1)
+
         for event in events {
-            let id = CalendarDateUtils.dayID(for: event.startDate, calendar: calendar)
-            var existing = colorsByDay[id] ?? []
-            if let color = event.calendarColor {
+            let color = event.calendarColor ?? fallbackColor
+
+            // Determinamos el rango de dias que ocupa el evento.
+            let firstDay = calendar.startOfDay(for: event.startDate)
+            let lastBoundary = event.endDate
+
+            // Si endDate == startDate (instantáneo) o el evento termina antes del
+            // siguiente startOfDay, ocupa solo un día.
+            var current = firstDay
+            var iterations = 0
+            let safety = 366 // por si acaso
+
+            while current < lastBoundary && iterations < safety {
+                let id = CalendarDateUtils.dayID(for: current, calendar: calendar)
+                var existing = colorsByDay[id] ?? []
                 if existing.count < 3 && !existing.contains(where: { areCGColorsEqual($0, color) }) {
                     existing.append(color)
                 }
-            } else if existing.isEmpty {
-                existing.append(CGColor(red: 0, green: 0.48, blue: 1, alpha: 1)) // fallback accent
+                colorsByDay[id] = existing
+
+                guard let next = calendar.date(byAdding: .day, value: 1, to: current) else { break }
+                current = next
+                iterations += 1
             }
-            colorsByDay[id] = existing
+
+            // Edge case: evento de duracion cero (start == end). Lo marcamos en su día.
+            if event.startDate == event.endDate {
+                let id = CalendarDateUtils.dayID(for: event.startDate, calendar: calendar)
+                var existing = colorsByDay[id] ?? []
+                if existing.count < 3 && !existing.contains(where: { areCGColorsEqual($0, color) }) {
+                    existing.append(color)
+                }
+                colorsByDay[id] = existing
+            }
         }
 
         return (0..<42).compactMap { index in
@@ -44,7 +71,7 @@ final class CalendarMonthBuilder {
             let dayID = CalendarDateUtils.dayID(for: date, calendar: calendar)
             let colors = colorsByDay[dayID] ?? []
             let weekday = calendar.component(.weekday, from: date)
-            let isWeekend = (weekday == 1 || weekday == 7) // Sun = 1, Sat = 7
+            let isWeekend = (weekday == 1 || weekday == 7)
 
             return CalendarDayItem(
                 id: dayID,

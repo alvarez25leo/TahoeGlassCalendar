@@ -293,8 +293,20 @@ final class CalendarViewModel: ObservableObject {
     }
 
     private func rebuildSelectedDateEvents() {
+        let dayStart = workCalendar.startOfDay(for: selectedDate)
+        guard let dayEnd = workCalendar.date(byAdding: .day, value: 1, to: dayStart) else {
+            selectedDateEvents = []
+            return
+        }
+
+        // Overlap real: el evento toca este dia si [start, end) intersecta [dayStart, dayEnd).
         selectedDateEvents = gridEvents
-            .filter { workCalendar.isDate($0.startDate, inSameDayAs: selectedDate) }
+            .filter { event in
+                if event.startDate == event.endDate {
+                    return workCalendar.isDate(event.startDate, inSameDayAs: selectedDate)
+                }
+                return event.startDate < dayEnd && event.endDate > dayStart
+            }
             .sorted { lhs, rhs in
                 if lhs.isAllDay != rhs.isAllDay {
                     return lhs.isAllDay && !rhs.isAllDay
@@ -314,7 +326,13 @@ final class CalendarViewModel: ObservableObject {
         let end = workCalendar.date(byAdding: .day, value: 1, to: start) ?? today
 
         if let events = events {
-            let todayEvents = events.filter { $0.startDate >= start && $0.startDate < end }
+            // Overlap: incluimos eventos multi-dia que cubren hoy.
+            let todayEvents = events.filter { event in
+                if event.startDate == event.endDate {
+                    return event.startDate >= start && event.startDate < end
+                }
+                return event.startDate < end && event.endDate > start
+            }
             applyTodayIndicator(events: todayEvents)
         } else if let cache = todayCache, workCalendar.isDate(cache.0, inSameDayAs: today) {
             applyTodayIndicator(events: cache.1)

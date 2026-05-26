@@ -101,6 +101,35 @@ final class CalendarMonthBuilderTests: XCTestCase {
         XCTAssertEqual(days.first?.dayNumber, 1)
     }
 
+    func testMultiDayEventMarksAllCoveredDays() {
+        let builder = makeBuilder()
+        let visible = date(2026, 5, 1)
+        // Evento de 3 días: 27, 28, 29 de mayo 2026
+        let start = date(2026, 5, 27, hour: 0)
+        let end = date(2026, 5, 30, hour: 0)  // endDate exclusivo (típico de all-day)
+
+        let event = CalendarEventItem(
+            id: "multi",
+            title: "Vacaciones",
+            startDate: start,
+            endDate: end,
+            isAllDay: true,
+            calendarTitle: "Personal",
+            calendarColor: nil,
+            location: nil,
+            notes: nil,
+            eventIdentifier: "multi"
+        )
+
+        let days = builder.buildDays(visibleMonth: visible, selectedDate: visible, events: [event])
+
+        let markedDays = days.filter { $0.hasEvents }.map { $0.dayNumber }
+        XCTAssertTrue(markedDays.contains(27), "Día 27 debe estar marcado")
+        XCTAssertTrue(markedDays.contains(28), "Día 28 debe estar marcado")
+        XCTAssertTrue(markedDays.contains(29), "Día 29 debe estar marcado")
+        XCTAssertFalse(markedDays.contains(30), "Día 30 NO debe estar marcado (endDate exclusivo)")
+    }
+
     func testMonthStartingSundayHasSixOffset() {
         let builder = makeBuilder()
         let visible = date(2026, 3, 1)

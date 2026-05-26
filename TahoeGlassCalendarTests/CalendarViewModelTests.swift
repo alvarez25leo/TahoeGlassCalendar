@@ -236,6 +236,37 @@ final class CalendarViewModelTests: XCTestCase {
         XCTAssertEqual(vm.selectedDateEvents.first?.title, "Overflow")
     }
 
+    // MARK: - Multi-day events
+
+    func testMultiDayEventVisibleOnMiddleDay() async {
+        let (vm, mock) = makeViewModel()
+        mock.status = .fullAccess
+        // Evento del 27 al 29 (endDate exclusivo). Seleccionamos el 28.
+        let start = date(2026, 5, 27, hour: 0)
+        let end = date(2026, 5, 30, hour: 0)
+        mock.events = [
+            CalendarEventItem(
+                id: "vac",
+                title: "Vacaciones",
+                startDate: start,
+                endDate: end,
+                isAllDay: true,
+                calendarTitle: "Personal",
+                calendarColor: nil,
+                location: nil,
+                notes: nil,
+                eventIdentifier: "vac"
+            )
+        ]
+        vm.visibleMonth = date(2026, 5, 1)
+        vm.selectedDate = date(2026, 5, 28)
+
+        await vm.bootstrap()
+
+        XCTAssertEqual(vm.selectedDateEvents.count, 1, "El día 28 debería ver el evento que lo cubre")
+        XCTAssertEqual(vm.selectedDateEvents.first?.title, "Vacaciones")
+    }
+
     // MARK: - isViewingCurrentMonth
 
     func testIsViewingCurrentMonthTrue() async {

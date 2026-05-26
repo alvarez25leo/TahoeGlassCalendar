@@ -83,6 +83,7 @@ struct QuickEventComposerView: View {
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                 titleFocused = true
+                headerIconBounce += 1
             }
         }
     }
@@ -104,11 +105,15 @@ struct QuickEventComposerView: View {
 
     // MARK: - Header
 
+    @State private var headerIconBounce: Int = 0
+
     private var header: some View {
         HStack(spacing: 8) {
             Image(systemName: isEditing ? "pencil.circle.fill" : "plus.circle.fill")
                 .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(selectedColor)
+                .symbolEffect(.bounce, value: headerIconBounce)
+                .contentTransition(.symbolEffect(.replace))
 
             Text(isEditing ? "Editar evento" : "Nuevo evento")
                 .font(.system(size: 13, weight: .semibold))
@@ -138,6 +143,11 @@ struct QuickEventComposerView: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
             .background(fieldBackground)
+            .overlay(
+                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    .stroke(titleFocused ? selectedColor.opacity(0.65) : .clear, lineWidth: 1.2)
+                    .animation(.easeInOut(duration: 0.18), value: titleFocused)
+            )
             .focused($titleFocused)
             .submitLabel(.done)
             .onSubmit { Task { await save() } }
@@ -374,7 +384,7 @@ struct QuickEventComposerView: View {
                     .frame(height: 26)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.pressable(scale: 0.94))
             .background(buttonCapsule(tint: nil))
             .keyboardShortcut(.cancelAction)
 
@@ -393,11 +403,12 @@ struct QuickEventComposerView: View {
                 .frame(height: 26)
                 .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.pressable(scale: 0.94))
             .background(buttonCapsule(tint: selectedColor))
             .keyboardShortcut(.return, modifiers: .command)
             .disabled(!canSave)
             .opacity(canSave ? 1 : 0.55)
+            .animation(.easeInOut(duration: 0.2), value: canSave)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)

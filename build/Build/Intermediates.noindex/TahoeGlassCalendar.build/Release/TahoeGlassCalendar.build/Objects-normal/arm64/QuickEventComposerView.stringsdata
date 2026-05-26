@@ -7,7 +7,7 @@
         "key": "Título",
         "location": {
           "startingColumn": 19,
-          "startingLine": 135
+          "startingLine": 140
         }
       },
       {
@@ -15,7 +15,7 @@
         "key": "Editar evento",
         "location": {
           "startingColumn": 30,
-          "startingLine": 113
+          "startingLine": 118
         }
       },
       {
@@ -23,7 +23,7 @@
         "key": "Nuevo evento",
         "location": {
           "startingColumn": 48,
-          "startingLine": 113
+          "startingLine": 118
         }
       },
       {
@@ -31,7 +31,7 @@
         "key": "Agregar ubicación",
         "location": {
           "startingColumn": 23,
-          "startingLine": 152
+          "startingLine": 162
         }
       },
       {
@@ -39,7 +39,7 @@
         "key": "Todo el día",
         "location": {
           "startingColumn": 26,
-          "startingLine": 168
+          "startingLine": 178
         }
       },
       {
@@ -47,7 +47,7 @@
         "key": "Inicio",
         "location": {
           "startingColumn": 24,
-          "startingLine": 188
+          "startingLine": 198
         }
       },
       {
@@ -55,14 +55,6 @@
         "key": "Fin",
         "location": {
           "startingColumn": 24,
-          "startingLine": 200
-        }
-      },
-      {
-        "comment": "",
-        "key": "Inicio",
-        "location": {
-          "startingColumn": 22,
           "startingLine": 210
         }
       },
@@ -70,8 +62,16 @@
         "comment": "",
         "key": "Inicio",
         "location": {
+          "startingColumn": 22,
+          "startingLine": 220
+        }
+      },
+      {
+        "comment": "",
+        "key": "Inicio",
+        "location": {
           "startingColumn": 21,
-          "startingLine": 216
+          "startingLine": 226
         }
       },
       {
@@ -79,7 +79,7 @@
         "key": "Fin",
         "location": {
           "startingColumn": 22,
-          "startingLine": 233
+          "startingLine": 243
         }
       },
       {
@@ -87,7 +87,7 @@
         "key": "Fin",
         "location": {
           "startingColumn": 21,
-          "startingLine": 239
+          "startingLine": 249
         }
       },
       {
@@ -95,7 +95,7 @@
         "key": "· %@",
         "location": {
           "startingColumn": 26,
-          "startingLine": 268
+          "startingLine": 278
         }
       },
       {
@@ -103,7 +103,7 @@
         "key": "Notas, URL…",
         "location": {
           "startingColumn": 22,
-          "startingLine": 346
+          "startingLine": 356
         }
       },
       {
@@ -111,7 +111,7 @@
         "key": "Cancelar",
         "location": {
           "startingColumn": 22,
-          "startingLine": 370
+          "startingLine": 380
         }
       },
       {
@@ -119,7 +119,7 @@
         "key": "Guardar",
         "location": {
           "startingColumn": 38,
-          "startingLine": 388
+          "startingLine": 398
         }
       },
       {
@@ -127,7 +127,7 @@
         "key": "Crear",
         "location": {
           "startingColumn": 50,
-          "startingLine": 388
+          "startingLine": 398
         }
       }
     ]

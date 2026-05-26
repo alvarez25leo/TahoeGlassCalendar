@@ -7,30 +7,6 @@
         "key": "Mes anterior",
         "location": {
           "startingColumn": 37,
-          "startingLine": 36
-        }
-      },
-      {
-        "comment": "",
-        "key": "Ir a hoy",
-        "location": {
-          "startingColumn": 37,
-          "startingLine": 56
-        }
-      },
-      {
-        "comment": "",
-        "key": "Mes siguiente",
-        "location": {
-          "startingColumn": 37,
-          "startingLine": 68
-        }
-      },
-      {
-        "comment": "",
-        "key": "Hoy",
-        "location": {
-          "startingColumn": 26,
           "startingLine": 42
         }
       },
@@ -38,8 +14,32 @@
         "comment": "",
         "key": "Ir a hoy",
         "location": {
+          "startingColumn": 37,
+          "startingLine": 65
+        }
+      },
+      {
+        "comment": "",
+        "key": "Mes siguiente",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 79
+        }
+      },
+      {
+        "comment": "",
+        "key": "Hoy",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 49
+        }
+      },
+      {
+        "comment": "",
+        "key": "Ir a hoy",
+        "location": {
           "startingColumn": 33,
-          "startingLine": 96
+          "startingLine": 107
         }
       },
       {
@@ -47,7 +47,7 @@
         "key": "Hoy",
         "location": {
           "startingColumn": 22,
-          "startingLine": 83
+          "startingLine": 94
         }
       }
     ]

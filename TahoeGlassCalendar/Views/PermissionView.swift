@@ -4,11 +4,17 @@ import AppKit
 struct PermissionView: View {
     let onAllow: () -> Void
 
+    @State private var iconBounce: Int = 0
+
     var body: some View {
         VStack(spacing: 14) {
             Image(systemName: "calendar")
                 .font(.system(size: 36, weight: .light))
                 .foregroundStyle(.secondary)
+                .symbolEffect(.bounce, value: iconBounce)
+                .onAppear {
+                    iconBounce = 1
+                }
 
             Text("Acceso al calendario")
                 .font(.system(size: 16, weight: .semibold))
@@ -23,6 +29,9 @@ struct PermissionView: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.regular)
                 .padding(.top, 4)
+                .scaleEffect(iconBounce > 0 ? 1.0 : 0.95)
+                .opacity(iconBounce > 0 ? 1.0 : 0)
+                .animation(.spring(response: 0.5, dampingFraction: 0.7).delay(0.15), value: iconBounce)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 28)

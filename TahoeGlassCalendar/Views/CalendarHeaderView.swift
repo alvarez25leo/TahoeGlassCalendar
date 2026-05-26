@@ -19,24 +19,31 @@ struct CalendarHeaderView: View {
         }
     }
 
+    @State private var prevBounce: Int = 0
+    @State private var nextBounce: Int = 0
+    @State private var todayBounce: Int = 0
+
     @available(macOS 26.0, *)
     private var liquidGlassNavGroup: some View {
         GlassEffectContainer(spacing: 4) {
             HStack(spacing: 4) {
                 Button {
+                    prevBounce += 1
                     Task { await viewModel.goToPreviousMonth() }
                 } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 11, weight: .semibold))
+                        .symbolEffect(.bounce, value: prevBounce)
                         .frame(width: 26, height: 26)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.pressable(scale: 0.9))
                 .glassEffect(.regular.interactive(), in: Circle())
                 .accessibilityLabel("Mes anterior")
                 .keyboardShortcut(.leftArrow, modifiers: .command)
 
                 Button {
+                    todayBounce += 1
                     Task { await viewModel.goToToday() }
                 } label: {
                     Text("Hoy")
@@ -45,8 +52,10 @@ struct CalendarHeaderView: View {
                         .frame(height: 26)
                         .foregroundStyle(viewModel.isViewingCurrentMonth ? .secondary : .primary)
                         .contentShape(Rectangle())
+                        .scaleEffect(todayBounce % 2 == 0 ? 1.0 : 1.05)
+                        .animation(.spring(response: 0.25, dampingFraction: 0.55), value: todayBounce)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.pressable(scale: 0.94))
                 .glassEffect(
                     viewModel.isViewingCurrentMonth
                         ? .regular.interactive()
@@ -56,14 +65,16 @@ struct CalendarHeaderView: View {
                 .accessibilityLabel("Ir a hoy")
 
                 Button {
+                    nextBounce += 1
                     Task { await viewModel.goToNextMonth() }
                 } label: {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 11, weight: .semibold))
+                        .symbolEffect(.bounce, value: nextBounce)
                         .frame(width: 26, height: 26)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.pressable(scale: 0.9))
                 .glassEffect(.regular.interactive(), in: Circle())
                 .accessibilityLabel("Mes siguiente")
                 .keyboardShortcut(.rightArrow, modifiers: .command)

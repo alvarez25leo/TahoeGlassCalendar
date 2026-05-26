@@ -43,6 +43,7 @@ struct EventListView: View {
             Image(systemName: "calendar.badge.checkmark")
                 .font(.system(size: 18, weight: .light))
                 .foregroundStyle(.tertiary)
+                .symbolEffect(.pulse, options: .repeat(.continuous).speed(0.4))
             Text("Sin eventos para este día")
                 .font(.system(size: 12))
                 .foregroundStyle(.secondary)
@@ -77,7 +78,7 @@ struct EventListView: View {
                         .frame(height: 24)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.pressable(scale: 0.92))
                 .glassEffect(.regular.interactive(), in: Capsule())
                 .help("Crear evento (⌘N)")
 
@@ -89,7 +90,7 @@ struct EventListView: View {
                         .frame(height: 24)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.pressable(scale: 0.92))
                 .glassEffect(.regular.interactive(), in: Capsule())
                 .help("Abrir Calendar en esta fecha (⌘O)")
             }

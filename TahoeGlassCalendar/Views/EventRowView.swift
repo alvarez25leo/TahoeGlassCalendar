@@ -49,6 +49,7 @@ struct EventRowView: View {
                             Image(systemName: "mappin.circle")
                                 .font(.system(size: 9))
                                 .foregroundStyle(.tertiary)
+                                .symbolEffect(.pulse, options: .speed(0.6), isActive: isHovering)
                             Text(location)
                                 .font(.system(size: 11))
                                 .foregroundStyle(.tertiary)
@@ -69,9 +70,9 @@ struct EventRowView: View {
             )
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.pressable(scale: 0.98))
         .onHover { hovering in isHovering = hovering }
-        .animation(.easeInOut(duration: 0.12), value: isHovering)
+        .animation(.spring(response: 0.22, dampingFraction: 0.75), value: isHovering)
         .contextMenu {
             Button {
                 onEdit()
@@ -94,6 +95,7 @@ struct EventRowView: View {
             Image(systemName: "trash.circle.fill")
                 .font(.system(size: 18))
                 .foregroundStyle(.red)
+                .symbolEffect(.pulse, options: .repeat(.continuous).speed(1.2))
 
             VStack(alignment: .leading, spacing: 1) {
                 Text("¿Eliminar \"\(event.title)\"?")
@@ -120,7 +122,7 @@ struct EventRowView: View {
                     .padding(.vertical, 4)
                     .background(Capsule().fill(Color.red))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.pressable(scale: 0.92))
             .keyboardShortcut(.return, modifiers: [])
         }
         .padding(.vertical, 6)

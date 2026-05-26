@@ -12,6 +12,7 @@ struct EmptyEventsView: View {
             Image(systemName: "calendar.badge.checkmark")
                 .font(.system(size: 26, weight: .light))
                 .foregroundStyle(.tertiary)
+                .symbolEffect(.pulse, options: .repeat(.continuous).speed(0.4))
 
             Text("Sin eventos para este día")
                 .font(.system(size: 13))

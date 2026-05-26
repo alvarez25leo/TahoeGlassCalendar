@@ -6,13 +6,17 @@ struct DayCellView: View {
     let onRightClick: () -> Void
 
     @State private var isHovering = false
+    @State private var pulse: Bool = false
 
     var body: some View {
         Button(action: onSelect) {
             VStack(spacing: 3) {
                 ZStack {
                     if day.isToday {
-                        Circle().fill(Color.accentColor)
+                        Circle()
+                            .fill(Color.accentColor)
+                            .scaleEffect(pulse ? 1.0 : 0.92)
+                            .opacity(pulse ? 1.0 : 0.85)
                     } else if isHovering && !day.isSelected {
                         Circle().fill(Color.primary.opacity(0.08))
                     }
@@ -33,7 +37,7 @@ struct DayCellView: View {
             .opacity(day.isCurrentMonth ? 1 : CalendarTheme.mutedOpacity)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.pressable(scale: 0.88))
         .overlay(
             RightClickCatcher(onRightClick: {
                 onSelect()
@@ -43,7 +47,23 @@ struct DayCellView: View {
         .onHover { hovering in
             isHovering = hovering
         }
-        .animation(.easeInOut(duration: 0.12), value: isHovering)
+        .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isHovering)
+        .onAppear {
+            if day.isToday {
+                withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) {
+                    pulse = true
+                }
+            }
+        }
+        .onChange(of: day.isToday) { _, isToday in
+            if isToday {
+                withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) {
+                    pulse = true
+                }
+            } else {
+                pulse = false
+            }
+        }
     }
 
     private var numberColor: Color {
@@ -63,6 +83,7 @@ struct DayCellView: View {
                     Circle()
                         .fill(Color(cgColor: day.eventColors[index]))
                         .frame(width: 4, height: 4)
+                        .transition(.scale.combined(with: .opacity))
                 }
             }
             .frame(height: 4)

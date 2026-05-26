@@ -7,7 +7,7 @@
         "key": "Acceso al calendario",
         "location": {
           "startingColumn": 18,
-          "startingLine": 13
+          "startingLine": 19
         }
       },
       {
@@ -15,7 +15,7 @@
         "key": "Permite el acceso para mostrar tus eventos desde la barra de menú.",
         "location": {
           "startingColumn": 18,
-          "startingLine": 16
+          "startingLine": 22
         }
       },
       {
@@ -23,7 +23,7 @@
         "key": "Permitir acceso",
         "location": {
           "startingColumn": 20,
-          "startingLine": 22
+          "startingLine": 28
         }
       },
       {
@@ -31,7 +31,7 @@
         "key": "Acceso bloqueado",
         "location": {
           "startingColumn": 18,
-          "startingLine": 39
+          "startingLine": 48
         }
       },
       {
@@ -39,7 +39,7 @@
         "key": "Habilítalo en Ajustes del Sistema → Privacidad y seguridad → Calendarios.",
         "location": {
           "startingColumn": 18,
-          "startingLine": 42
+          "startingLine": 51
         }
       },
       {
@@ -47,7 +47,7 @@
         "key": "Abrir Ajustes del Sistema",
         "location": {
           "startingColumn": 20,
-          "startingLine": 48
+          "startingLine": 57
         }
       }
     ]
