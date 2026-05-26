@@ -124,63 +124,73 @@ final class CalendarService: CalendarServiceProtocol, @unchecked Sendable {
     }
 
     func createEvent(_ draft: NewEventDraft) async throws -> String {
-        guard let calendar = store.calendar(withIdentifier: draft.calendarID) else {
-            throw CalendarServiceError.calendarNotFound
-        }
+        let store = self.store
+        return try await Task.detached(priority: .userInitiated) {
+            guard let calendar = store.calendar(withIdentifier: draft.calendarID) else {
+                throw CalendarServiceError.calendarNotFound
+            }
 
-        let event = EKEvent(eventStore: store)
-        apply(draft, to: event, calendar: calendar)
+            let event = EKEvent(eventStore: store)
+            event.title = draft.title.trimmingCharacters(in: .whitespacesAndNewlines)
+            event.location = draft.location.isEmpty ? nil : draft.location
+            event.notes = draft.notes.isEmpty ? nil : draft.notes
+            event.startDate = draft.startDate
+            event.endDate = draft.endDate
+            event.isAllDay = draft.isAllDay
+            event.calendar = calendar
 
-        do {
-            try store.save(event, span: .thisEvent)
-            AppLogger.calendar.info("Event created: \(event.eventIdentifier ?? "<no-id>", privacy: .public)")
-            return event.eventIdentifier ?? UUID().uuidString
-        } catch {
-            AppLogger.calendar.error("Save event failed: \(error.localizedDescription, privacy: .public)")
-            throw CalendarServiceError.saveFailed(error)
-        }
+            do {
+                try store.save(event, span: .thisEvent)
+                AppLogger.calendar.info("Event created: \(event.eventIdentifier ?? "<no-id>", privacy: .public)")
+                return event.eventIdentifier ?? UUID().uuidString
+            } catch {
+                AppLogger.calendar.error("Save event failed: \(error.localizedDescription, privacy: .public)")
+                throw CalendarServiceError.saveFailed(error)
+            }
+        }.value
     }
 
     func updateEvent(eventID: String, draft: NewEventDraft) async throws {
-        guard let event = store.event(withIdentifier: eventID) else {
-            throw CalendarServiceError.eventNotFound
-        }
-        guard let calendar = store.calendar(withIdentifier: draft.calendarID) else {
-            throw CalendarServiceError.calendarNotFound
-        }
+        let store = self.store
+        try await Task.detached(priority: .userInitiated) {
+            guard let event = store.event(withIdentifier: eventID) else {
+                throw CalendarServiceError.eventNotFound
+            }
+            guard let calendar = store.calendar(withIdentifier: draft.calendarID) else {
+                throw CalendarServiceError.calendarNotFound
+            }
 
-        apply(draft, to: event, calendar: calendar)
+            event.title = draft.title.trimmingCharacters(in: .whitespacesAndNewlines)
+            event.location = draft.location.isEmpty ? nil : draft.location
+            event.notes = draft.notes.isEmpty ? nil : draft.notes
+            event.startDate = draft.startDate
+            event.endDate = draft.endDate
+            event.isAllDay = draft.isAllDay
+            event.calendar = calendar
 
-        do {
-            try store.save(event, span: .thisEvent)
-            AppLogger.calendar.info("Event updated: \(eventID, privacy: .public)")
-        } catch {
-            AppLogger.calendar.error("Update event failed: \(error.localizedDescription, privacy: .public)")
-            throw CalendarServiceError.saveFailed(error)
-        }
+            do {
+                try store.save(event, span: .thisEvent)
+                AppLogger.calendar.info("Event updated: \(eventID, privacy: .public)")
+            } catch {
+                AppLogger.calendar.error("Update event failed: \(error.localizedDescription, privacy: .public)")
+                throw CalendarServiceError.saveFailed(error)
+            }
+        }.value
     }
 
     func deleteEvent(eventID: String) async throws {
-        guard let event = store.event(withIdentifier: eventID) else {
-            throw CalendarServiceError.eventNotFound
-        }
-
-        do {
-            try store.remove(event, span: .thisEvent)
-            AppLogger.calendar.info("Event deleted: \(eventID, privacy: .public)")
-        } catch {
-            AppLogger.calendar.error("Delete event failed: \(error.localizedDescription, privacy: .public)")
-            throw CalendarServiceError.deleteFailed(error)
-        }
-    }
-
-    private func apply(_ draft: NewEventDraft, to event: EKEvent, calendar: EKCalendar) {
-        event.title = draft.title.trimmingCharacters(in: .whitespacesAndNewlines)
-        event.location = draft.location.isEmpty ? nil : draft.location
-        event.notes = draft.notes.isEmpty ? nil : draft.notes
-        event.startDate = draft.startDate
-        event.endDate = draft.endDate
-        event.isAllDay = draft.isAllDay
-        event.calendar = calendar
+        let store = self.store
+        try await Task.detached(priority: .userInitiated) {
+            guard let event = store.event(withIdentifier: eventID) else {
+                throw CalendarServiceError.eventNotFound
+            }
+            do {
+                try store.remove(event, span: .thisEvent)
+                AppLogger.calendar.info("Event deleted: \(eventID, privacy: .public)")
+            } catch {
+                AppLogger.calendar.error("Delete event failed: \(error.localizedDescription, privacy: .public)")
+                throw CalendarServiceError.deleteFailed(error)
+            }
+        }.value
     }
 }

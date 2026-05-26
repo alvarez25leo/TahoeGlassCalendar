@@ -187,6 +187,8 @@ final class CalendarViewModel: ObservableObject {
         quickAddError = nil
     }
 
+    /// Marca el row para mostrar confirmacion inline. NO usa NSAlert porque
+    /// abre conflicto de focus con NSPopover.transient (genera UI freeze).
     func requestDelete(_ event: CalendarEventItem) {
         pendingDeleteEvent = event
     }
@@ -195,18 +197,30 @@ final class CalendarViewModel: ObservableObject {
         pendingDeleteEvent = nil
     }
 
-    func confirmDelete() async {
-        guard let event = pendingDeleteEvent else { return }
-        pendingDeleteEvent = nil
+    func confirmDelete(_ event: CalendarEventItem) async {
+        // Clear de inmediato para que la UI vuelva al estado normal sin esperar
+        // el round-trip de EventKit/iCloud.
+        if pendingDeleteEvent?.id == event.id {
+            pendingDeleteEvent = nil
+        }
 
-        guard let id = event.eventIdentifier ?? Optional(event.id) else { return }
+        // Optimistic update: removemos el evento de la lista en memoria antes
+        // de que EventKit termine, para que la UI responda al instante.
+        gridEvents.removeAll { $0.id == event.id }
+        rebuildSelectedDateEvents()
+        rebuildDays()
+
+        let id = event.eventIdentifier ?? event.id
 
         do {
             try await calendarService.deleteEvent(eventID: id)
+            // Refresh para recoger cualquier sync. Si falla, el observer de
+            // EKEventStoreChanged lo emparejará.
             await refreshAll()
         } catch {
-            quickAddError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             AppLogger.calendar.error("Delete failed: \(error.localizedDescription, privacy: .public)")
+            // Restauramos refrescando.
+            await refreshAll()
         }
     }
 

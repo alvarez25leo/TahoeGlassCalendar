@@ -2,11 +2,14 @@ import SwiftUI
 
 struct EventListView: View {
     let events: [CalendarEventItem]
+    let pendingDeleteEventID: String?
     let onOpenCalendar: () -> Void
     let onOpenEvent: (CalendarEventItem) -> Void
     let onCreateEvent: () -> Void
     let onEditEvent: (CalendarEventItem) -> Void
-    let onDeleteEvent: (CalendarEventItem) -> Void
+    let onRequestDelete: (CalendarEventItem) -> Void
+    let onConfirmDelete: (CalendarEventItem) -> Void
+    let onCancelDelete: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -18,9 +21,12 @@ struct EventListView: View {
                         ForEach(events) { event in
                             EventRowView(
                                 event: event,
+                                isConfirmingDelete: event.id == pendingDeleteEventID,
                                 onTap: { onOpenEvent(event) },
                                 onEdit: { onEditEvent(event) },
-                                onDelete: { onDeleteEvent(event) }
+                                onRequestDelete: { onRequestDelete(event) },
+                                onConfirmDelete: { onConfirmDelete(event) },
+                                onCancelDelete: onCancelDelete
                             )
                         }
                     }

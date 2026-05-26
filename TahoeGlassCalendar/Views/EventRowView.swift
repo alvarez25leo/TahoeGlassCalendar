@@ -2,13 +2,29 @@ import SwiftUI
 
 struct EventRowView: View {
     let event: CalendarEventItem
+    let isConfirmingDelete: Bool
     let onTap: () -> Void
     let onEdit: () -> Void
-    let onDelete: () -> Void
+    let onRequestDelete: () -> Void
+    let onConfirmDelete: () -> Void
+    let onCancelDelete: () -> Void
 
     @State private var isHovering = false
 
     var body: some View {
+        Group {
+            if isConfirmingDelete {
+                confirmationRow
+            } else {
+                normalRow
+            }
+        }
+        .animation(.easeInOut(duration: 0.18), value: isConfirmingDelete)
+    }
+
+    // MARK: - Normal row
+
+    private var normalRow: some View {
         Button(action: onTap) {
             HStack(alignment: .top, spacing: 10) {
                 colorIndicator
@@ -54,9 +70,7 @@ struct EventRowView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .onHover { hovering in
-            isHovering = hovering
-        }
+        .onHover { hovering in isHovering = hovering }
         .animation(.easeInOut(duration: 0.12), value: isHovering)
         .contextMenu {
             Button {
@@ -66,11 +80,59 @@ struct EventRowView: View {
             }
 
             Button(role: .destructive) {
-                onDelete()
+                onRequestDelete()
             } label: {
                 Label("Eliminar", systemImage: "trash")
             }
         }
+    }
+
+    // MARK: - Confirmation row (inline, sin modal)
+
+    private var confirmationRow: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "trash.circle.fill")
+                .font(.system(size: 18))
+                .foregroundStyle(.red)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text("¿Eliminar \"\(event.title)\"?")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                Text("No se puede deshacer")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.tertiary)
+            }
+
+            Spacer(minLength: 0)
+
+            Button("Cancelar", action: onCancelDelete)
+                .buttonStyle(.borderless)
+                .controlSize(.small)
+                .keyboardShortcut(.cancelAction)
+
+            Button(action: onConfirmDelete) {
+                Text("Eliminar")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(Color.red))
+            }
+            .buttonStyle(.plain)
+            .keyboardShortcut(.return, modifiers: [])
+        }
+        .padding(.vertical, 6)
+        .padding(.horizontal, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(Color.red.opacity(0.1))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(Color.red.opacity(0.3), lineWidth: 0.5)
+        )
     }
 
     private var timeLabel: String {

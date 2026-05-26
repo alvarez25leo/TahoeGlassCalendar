@@ -7,7 +7,7 @@
         "key": "Editar",
         "location": {
           "startingColumn": 23,
-          "startingLine": 65
+          "startingLine": 79
         }
       },
       {
@@ -15,7 +15,39 @@
         "key": "Eliminar",
         "location": {
           "startingColumn": 23,
-          "startingLine": 71
+          "startingLine": 85
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancelar",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 110
+        }
+      },
+      {
+        "comment": "",
+        "key": "¿Eliminar \"%@\"?",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 99
+        }
+      },
+      {
+        "comment": "",
+        "key": "No se puede deshacer",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 103
+        }
+      },
+      {
+        "comment": "",
+        "key": "Eliminar",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 116
         }
       }
     ]

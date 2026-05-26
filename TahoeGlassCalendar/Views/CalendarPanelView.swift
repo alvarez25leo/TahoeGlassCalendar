@@ -48,30 +48,20 @@ struct CalendarPanelView: View {
 
             EventListView(
                 events: viewModel.selectedDateEvents,
+                pendingDeleteEventID: viewModel.pendingDeleteEvent?.id,
                 onOpenCalendar: { viewModel.openCalendar() },
                 onOpenEvent: { event in viewModel.openEvent(event) },
                 onCreateEvent: { viewModel.createNewEvent() },
                 onEditEvent: { event in viewModel.presentEdit(for: event) },
-                onDeleteEvent: { event in viewModel.requestDelete(event) }
+                onRequestDelete: { event in viewModel.requestDelete(event) },
+                onConfirmDelete: { event in
+                    Task { await viewModel.confirmDelete(event) }
+                },
+                onCancelDelete: { viewModel.cancelDelete() }
             )
         }
         .task {
             await viewModel.refreshAll()
-        }
-        .alert(
-            "¿Eliminar este evento?",
-            isPresented: Binding(
-                get: { viewModel.pendingDeleteEvent != nil },
-                set: { newValue in if !newValue { viewModel.cancelDelete() } }
-            ),
-            presenting: viewModel.pendingDeleteEvent
-        ) { event in
-            Button("Cancelar", role: .cancel) { viewModel.cancelDelete() }
-            Button("Eliminar", role: .destructive) {
-                Task { await viewModel.confirmDelete() }
-            }
-        } message: { event in
-            Text("Se borrará \"\(event.title)\" de tu calendario. Esta acción no se puede deshacer.")
         }
     }
 
