@@ -8,6 +8,10 @@ struct CountdownView: View {
     let isHidden: Bool
     let onToggleVisibility: () -> Void
 
+    @State private var isHovering: Bool = false
+    @State private var showDetailPopover: Bool = false
+    @State private var hoverTask: Task<Void, Never>?
+
     var body: some View {
         Group {
             if isHidden {
@@ -51,7 +55,7 @@ struct CountdownView: View {
     private func countdownPill(snapshot: CountdownSnapshot, event: CalendarEventItem) -> some View {
         Button(action: onToggleVisibility) {
             HStack(spacing: 6) {
-                statusDot(state: snapshot.state)
+                statusDot(state: snapshot.state, color: eventColor(for: event))
 
                 if let primary = snapshot.primaryText {
                     rollingNumber(primary)
@@ -68,10 +72,26 @@ struct CountdownView: View {
             .frame(height: 24)
             .contentShape(Rectangle())
             .background(pillBackground(state: snapshot.state))
-            .help(snapshot.tooltip(eventTitle: event.title))
         }
         .buttonStyle(.pressable(scale: 0.94))
         .transition(.opacity.combined(with: .scale(scale: 0.92)))
+        .onHover { hovering in
+            isHovering = hovering
+            hoverTask?.cancel()
+            if hovering {
+                hoverTask = Task {
+                    try? await Task.sleep(nanoseconds: 350_000_000)
+                    if !Task.isCancelled {
+                        await MainActor.run { showDetailPopover = true }
+                    }
+                }
+            } else {
+                showDetailPopover = false
+            }
+        }
+        .popover(isPresented: $showDetailPopover, arrowEdge: .top) {
+            CountdownDetailCard(event: event, snapshot: snapshot)
+        }
     }
 
     // MARK: - Rolling number
@@ -97,13 +117,13 @@ struct CountdownView: View {
     // MARK: - Status dot
 
     @ViewBuilder
-    private func statusDot(state: CountdownState) -> some View {
+    private func statusDot(state: CountdownState, color: Color) -> some View {
         Circle()
-            .fill(state.color)
+            .fill(color)
             .frame(width: 5, height: 5)
             .overlay(
                 Circle()
-                    .stroke(state.color.opacity(0.4), lineWidth: 2)
+                    .stroke(color.opacity(0.4), lineWidth: 2)
                     .scaleEffect(state == .imminent ? 2.0 : 1.0)
                     .opacity(state == .imminent ? 0 : 0)
                     .animation(
@@ -113,6 +133,13 @@ struct CountdownView: View {
                         value: state
                     )
             )
+    }
+
+    private func eventColor(for event: CalendarEventItem) -> Color {
+        if let cg = event.calendarColor {
+            return Color(cgColor: cg)
+        }
+        return .accentColor
     }
 
     // MARK: - Background
@@ -253,17 +280,200 @@ struct CountdownSnapshot {
         }
     }
 
-    func tooltip(eventTitle: String) -> String {
+    var stateLabel: String {
         switch state {
-        case .inProgress:
-            return "En curso: \(eventTitle) — Click para ocultar"
-        case .justStarted:
-            return "\(eventTitle) finalizó — Click para ocultar"
-        default:
-            let formatter = DateFormatter()
-            formatter.dateFormat = "HH:mm"
-            let timeStr = formatter.string(from: eventStart)
-            return "Próximo: \(eventTitle) a las \(timeStr) — Click para ocultar"
+        case .future:       return "Próximo evento"
+        case .soon:         return "Empieza pronto"
+        case .imminent:     return "¡Ya casi!"
+        case .inProgress:   return "En curso ahora"
+        case .justStarted:  return "Finalizado"
         }
+    }
+}
+
+// MARK: - Detail card (hover popover)
+
+/// Card detallada que se muestra al hacer hover sobre el countdown.
+/// Pensada para que el usuario entienda de un vistazo a qué evento corresponde
+/// el contador antes de decidir si lo oculta.
+struct CountdownDetailCard: View {
+    let event: CalendarEventItem
+    let snapshot: CountdownSnapshot
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            header
+            Divider().opacity(0.4)
+            scheduleRow
+            if let location = event.location, !location.isEmpty {
+                locationRow(location)
+            }
+            calendarRow
+            if let notes = event.notes?.trimmingCharacters(in: .whitespacesAndNewlines),
+               !notes.isEmpty {
+                Divider().opacity(0.3)
+                notesRow(notes)
+            }
+            Divider().opacity(0.3)
+            footerHint
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .frame(width: 280, alignment: .leading)
+    }
+
+    // MARK: - Sections
+
+    private var header: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Circle()
+                .fill(eventColor)
+                .frame(width: 8, height: 8)
+                .padding(.top, 5)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(snapshot.stateLabel.uppercased())
+                    .font(.system(size: 9, weight: .bold, design: .rounded))
+                    .foregroundStyle(snapshot.state.color)
+                    .tracking(0.6)
+
+                Text(event.title)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+    }
+
+    private var scheduleRow: some View {
+        HStack(alignment: .top, spacing: 8) {
+            iconBadge(systemName: "clock.fill")
+            VStack(alignment: .leading, spacing: 2) {
+                Text(scheduleText)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.primary)
+                    .monospacedDigit()
+                Text(relativeText)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func locationRow(_ location: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            iconBadge(systemName: "mappin.and.ellipse")
+            Text(location)
+                .font(.system(size: 12))
+                .foregroundStyle(.primary)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var calendarRow: some View {
+        HStack(alignment: .center, spacing: 8) {
+            iconBadge(systemName: "calendar")
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(eventColor)
+                    .frame(width: 7, height: 7)
+                Text(event.calendarTitle)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+            }
+        }
+    }
+
+    private func notesRow(_ notes: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            iconBadge(systemName: "text.alignleft")
+            Text(notes)
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var footerHint: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "hand.tap")
+                .font(.system(size: 9, weight: .medium))
+                .foregroundStyle(.tertiary)
+            Text("Click en el contador para ocultarlo")
+                .font(.system(size: 10))
+                .foregroundStyle(.tertiary)
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func iconBadge(systemName: String) -> some View {
+        Image(systemName: systemName)
+            .font(.system(size: 10, weight: .semibold))
+            .foregroundStyle(.secondary)
+            .frame(width: 16, height: 16)
+    }
+
+    private var eventColor: Color {
+        if let cg = event.calendarColor {
+            return Color(cgColor: cg)
+        }
+        return .accentColor
+    }
+
+    private var scheduleText: String {
+        if event.isAllDay {
+            return "Todo el día · \(DateFormatters.selectedDateLong.string(from: event.startDate))"
+        }
+        let startTime = DateFormatters.eventTime.string(from: event.startDate)
+        let endTime = DateFormatters.eventTime.string(from: event.endDate)
+        let day = DateFormatters.selectedDateLong.string(from: event.startDate)
+        return "\(day) · \(startTime)–\(endTime)"
+    }
+
+    private var relativeText: String {
+        let now = Date()
+        let delta = Int(event.startDate.timeIntervalSince(now))
+        let duration = Int(event.endDate.timeIntervalSince(event.startDate))
+
+        if delta <= 0 {
+            let remaining = Int(event.endDate.timeIntervalSince(now))
+            if remaining > 0 {
+                return "Termina en \(formatDuration(remaining))"
+            }
+            return "Ya terminó"
+        }
+
+        let durationStr = formatDuration(duration)
+        let relStr: String
+        if delta < 60 {
+            relStr = "Empieza en \(delta)s"
+        } else if delta < 3600 {
+            let m = delta / 60
+            relStr = "Empieza en \(m) min"
+        } else if delta < 86_400 {
+            let h = delta / 3600
+            let m = (delta % 3600) / 60
+            relStr = m > 0 ? "Empieza en \(h)h \(m)m" : "Empieza en \(h)h"
+        } else {
+            let d = delta / 86_400
+            let h = (delta % 86_400) / 3600
+            relStr = h > 0 ? "Empieza en \(d)d \(h)h" : "Empieza en \(d)d"
+        }
+        return "\(relStr) · dura \(durationStr)"
+    }
+
+    private func formatDuration(_ seconds: Int) -> String {
+        if seconds < 60 { return "\(seconds)s" }
+        if seconds < 3600 { return "\(seconds / 60) min" }
+        let h = seconds / 3600
+        let m = (seconds % 3600) / 60
+        return m > 0 ? "\(h)h \(m)m" : "\(h)h"
     }
 }

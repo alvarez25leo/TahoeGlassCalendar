@@ -1,0 +1,107 @@
+# ─────────────────────────────────────────────────────────────────────
+# macOS
+# ─────────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+
+# ─────────────────────────────────────────────────────────────────────
+# Xcode — build artifacts
+# ─────────────────────────────────────────────────────────────────────
+build/
+DerivedData/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Xcode 16+ project caches
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/configuration/
+*.xcodeproj/**/PIFCache/
+*.xcodeproj/**/*.pif
+
+# Per-user Xcode state (esquemas privados, breakpoints, layout)
+*.xcuserstate
+*.xcuserdatad
+xcuserdata/
+*.perspectivev3
+*.mode1v3
+*.mode2v3
+*.pbxuser
+
+# Compilados
+*.o
+*.a
+*.dylib
+*.framework
+*.dSYM/
+*.dSYM.zip
+
+# Index, logs, sourcekit
+*.hmap
+*.ipa
+*.xcarchive
+*.moved-aside
+*.swiftdoc
+*.swiftmodule.tmp
+.swiftpm/
+*.log
+
+# ─────────────────────────────────────────────────────────────────────
+# Swift Package Manager
+# ─────────────────────────────────────────────────────────────────────
+.build/
+Packages/
+Package.pins
+Package.resolved
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+# ─────────────────────────────────────────────────────────────────────
+# CocoaPods / Carthage (por si en el futuro)
+# ─────────────────────────────────────────────────────────────────────
+Pods/
+Carthage/Build/
+Carthage/Checkouts/
+
+# ─────────────────────────────────────────────────────────────────────
+# Fastlane
+# ─────────────────────────────────────────────────────────────────────
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output/
+
+# ─────────────────────────────────────────────────────────────────────
+# Provisioning / firmas — NUNCA commitear secrets
+# ─────────────────────────────────────────────────────────────────────
+*.mobileprovision
+*.provisionprofile
+*.cer
+*.p12
+*.certSigningRequest
+ExportOptions.plist
+
+# ─────────────────────────────────────────────────────────────────────
+# Editores
+# ─────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ─────────────────────────────────────────────────────────────────────
+# Claude Code / herramientas locales
+# ─────────────────────────────────────────────────────────────────────
+.claude/
+CLAUDE.local.md
+
+# ─────────────────────────────────────────────────────────────────────
+# Variables de entorno
+# ─────────────────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
