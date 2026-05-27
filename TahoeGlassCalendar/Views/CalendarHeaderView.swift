@@ -47,7 +47,7 @@ struct CalendarHeaderView: View {
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.tertiary)
 
-            TextField("Buscar eventos…", text: $viewModel.searchQuery)
+            TextField(viewModel.searchPlaceholder, text: $viewModel.searchQuery)
                 .textFieldStyle(.plain)
                 .font(.system(size: 13))
                 .focused($searchFocused)

@@ -153,6 +153,32 @@ final class CalendarViewModelTests: XCTestCase {
         XCTAssertEqual(vm.selectedDateEvents.last?.title, "Timed")
     }
 
+    // MARK: - Search
+
+    func testSearchFindsEventsWithinThreeMonthsOutsideVisibleGrid() async {
+        let (vm, mock) = makeViewModel()
+        mock.status = .fullAccess
+        let visible = date(2026, 5, 1)
+        let outsideGrid = date(2026, 7, 10, hour: 14)
+        mock.events = [makeEvent(on: outsideGrid, title: "Roadmap")]
+        vm.visibleMonth = visible
+        vm.selectedDate = visible
+
+        await vm.bootstrap()
+
+        XCTAssertTrue(vm.searchResults.isEmpty)
+
+        vm.searchQuery = "roadmap"
+        vm.toggleSearch()
+
+        for _ in 0..<10 where vm.searchResults.isEmpty {
+            try? await Task.sleep(nanoseconds: 50_000_000)
+        }
+
+        XCTAssertEqual(vm.searchResults.count, 1)
+        XCTAssertEqual(vm.searchResults.first?.events.first?.title, "Roadmap")
+    }
+
     // MARK: - month navigation
 
     func testGoToPreviousMonth() async {

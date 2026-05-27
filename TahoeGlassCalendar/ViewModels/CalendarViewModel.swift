@@ -36,6 +36,7 @@ final class CalendarViewModel: ObservableObject {
     @Published var searchQuery: String = ""
     @Published private(set) var searchResults: [SearchResultGroup] = []
     @Published var isSearchActive: Bool = false
+    @Published private(set) var isSearchLoading: Bool = false
 
     struct SearchResultGroup: Identifiable, Equatable {
         let id: String          // dayID
@@ -54,6 +55,8 @@ final class CalendarViewModel: ObservableObject {
     /// `selectedDateEvents`, `days`, `upcomingEvent`, `searchResults` y el
     /// indicador de hoy se recalculan vía `rebuildDerived()`.
     private var gridEvents: [CalendarEventItem] = []
+    private var searchEvents: [CalendarEventItem] = []
+    private var loadedSearchRange: (start: Date, end: Date)?
 
     /// Cache para el "hoy" cuando el usuario está navegando por otro mes y
     /// `gridEvents` ya no incluye el día actual. Se invalida al cambiar de día
@@ -73,8 +76,11 @@ final class CalendarViewModel: ObservableObject {
     /// Generación monotónica para descartar fetches obsoletos (race condition al
     /// navegar rápido entre meses). Sólo gana el último.
     private var fetchGeneration: Int = 0
+    private var searchFetchGeneration: Int = 0
     private var storeChangesListener: Task<Void, Never>?
     private var searchCancellable: AnyCancellable?
+
+    private let searchMonthRadius = 3
 
     init(
         calendarService: CalendarServiceProtocol = CalendarService(),
@@ -153,6 +159,9 @@ final class CalendarViewModel: ObservableObject {
     func refreshAll() async {
         guard permissionState == .fullAccess else {
             gridEvents = []
+            searchEvents = []
+            loadedSearchRange = nil
+            isSearchLoading = false
             rebuildDerived(now: Date())
             return
         }
@@ -172,7 +181,15 @@ final class CalendarViewModel: ObservableObject {
 
         gridEvents = events
         isLoading = false
+        if isSearchActive {
+            searchEvents = []
+            loadedSearchRange = nil
+        }
         rebuildDerived(now: Date())
+
+        if isSearchActive {
+            Task { [weak self] in await self?.refreshSearchWindow() }
+        }
 
         // Si el día de hoy no está en el grid visible, refrescamos el cache
         // off-month en background para que el menubar siga reflejándolo.
@@ -289,16 +306,58 @@ final class CalendarViewModel: ObservableObject {
 
     func toggleSearch() {
         isSearchActive.toggle()
-        if !isSearchActive {
+        if isSearchActive {
+            Task { [weak self] in await self?.refreshSearchWindow() }
+        } else {
             searchQuery = ""
             searchResults = []
+            searchEvents = []
+            loadedSearchRange = nil
+            isSearchLoading = false
         }
     }
 
     func clearSearch() {
         searchQuery = ""
         searchResults = []
+        searchEvents = []
+        loadedSearchRange = nil
+        isSearchLoading = false
         isSearchActive = false
+    }
+
+    var searchPlaceholder: String {
+        "Buscar en ±\(searchMonthRadius) meses…"
+    }
+
+    var searchScopeLabel: String {
+        "±\(searchMonthRadius) meses"
+    }
+
+    private func refreshSearchWindow() async {
+        guard permissionState == .fullAccess else {
+            searchEvents = []
+            loadedSearchRange = nil
+            searchResults = []
+            isSearchLoading = false
+            return
+        }
+
+        searchFetchGeneration += 1
+        let myGeneration = searchFetchGeneration
+        isSearchLoading = true
+
+        let range = searchRange(for: visibleMonth)
+        let events = await calendarService.fetchEvents(from: range.start, to: range.end)
+
+        guard myGeneration == searchFetchGeneration else {
+            return
+        }
+
+        searchEvents = events
+        loadedSearchRange = range
+        isSearchLoading = false
+        rebuildSearchResults()
     }
 
     private func rebuildSearchResults() {
@@ -308,7 +367,8 @@ final class CalendarViewModel: ObservableObject {
             return
         }
 
-        let matches = gridEvents.filter { event in
+        let sourceEvents = loadedSearchRange == nil ? gridEvents : searchEvents
+        let matches = sourceEvents.filter { event in
             if event.title.lowercased().contains(q) { return true }
             if let loc = event.location?.lowercased(), loc.contains(q) { return true }
             if let notes = event.notes?.lowercased(), notes.contains(q) { return true }
@@ -331,6 +391,13 @@ final class CalendarViewModel: ObservableObject {
                 return SearchResultGroup(id: dayID, date: dayStart, events: sorted)
             }
             .sorted { $0.date < $1.date }
+    }
+
+    private func searchRange(for date: Date) -> (start: Date, end: Date) {
+        let monthStart = CalendarDateUtils.startOfMonth(for: date, calendar: workCalendar)
+        let start = workCalendar.date(byAdding: .month, value: -searchMonthRadius, to: monthStart) ?? monthStart
+        let end = workCalendar.date(byAdding: .month, value: searchMonthRadius + 1, to: monthStart) ?? monthStart
+        return (start, end)
     }
 
     // MARK: - Quick add / edit / delete
@@ -374,6 +441,7 @@ final class CalendarViewModel: ObservableObject {
 
         // Optimistic update sobre la única fuente de verdad.
         gridEvents.removeAll { $0.id == event.id }
+        searchEvents.removeAll { $0.id == event.id }
         rebuildDerived(now: Date())
 
         let id = event.eventIdentifier ?? event.id

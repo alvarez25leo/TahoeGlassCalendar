@@ -54,6 +54,8 @@ struct CalendarPanelView: View {
                 isSearchActive: viewModel.isSearchActive,
                 searchQuery: viewModel.searchQuery,
                 searchResults: viewModel.searchResults,
+                isSearchLoading: viewModel.isSearchLoading,
+                searchScopeLabel: viewModel.searchScopeLabel,
                 onToggleCountdown: { viewModel.toggleCountdownHidden() },
                 onOpenCalendar: { viewModel.openCalendar() },
                 onOpenEvent: { event in viewModel.openEvent(event) },

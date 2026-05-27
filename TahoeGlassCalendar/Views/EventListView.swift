@@ -10,6 +10,8 @@ struct EventListView: View {
     let isSearchActive: Bool
     let searchQuery: String
     let searchResults: [CalendarViewModel.SearchResultGroup]
+    let isSearchLoading: Bool
+    let searchScopeLabel: String
 
     let onToggleCountdown: () -> Void
     let onOpenCalendar: () -> Void
@@ -62,7 +64,9 @@ struct EventListView: View {
     private var searchSection: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: CalendarTheme.stackSpacing) {
-                if searchResults.isEmpty {
+                if searchResults.isEmpty && isSearchLoading {
+                    searchLoadingState
+                } else if searchResults.isEmpty {
                     searchEmptyState
                 } else {
                     ForEach(searchResults) { group in
@@ -101,7 +105,26 @@ struct EventListView: View {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(.tertiary)
-            Text("Sin resultados para \"\(searchQuery)\"")
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Sin resultados para \"\(searchQuery)\"")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                Text("Buscado en \(searchScopeLabel)")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.tertiary)
+            }
+            Spacer()
+        }
+        .frame(height: 40)
+        .padding(.horizontal, CalendarTheme.rowPaddingH)
+    }
+
+    private var searchLoadingState: some View {
+        HStack(spacing: 10) {
+            ProgressView()
+                .controlSize(.small)
+                .scaleEffect(0.65)
+            Text("Buscando en \(searchScopeLabel)…")
                 .font(.system(size: 12))
                 .foregroundStyle(.secondary)
             Spacer()
