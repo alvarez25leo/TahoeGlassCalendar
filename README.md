@@ -236,6 +236,12 @@ Build a local Release copy:
 ./install.sh
 ```
 
+## License
+
+Tahoe Glass Calendar is released under the [MIT License](LICENSE).
+
+You can use, copy, modify, distribute, and commercialize the app freely. The only requirement is to keep the copyright and license notice so the original developer is credited.
+
 ## Repository
 
 [github.com/alvarez25leo/TahoeGlassCalendar](https://github.com/alvarez25leo/TahoeGlassCalendar)
