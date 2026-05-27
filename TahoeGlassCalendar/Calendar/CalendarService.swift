@@ -115,6 +115,7 @@ final class CalendarService: CalendarServiceProtocol, @unchecked Sendable {
                         endDate: event.endDate,
                         isAllDay: event.isAllDay,
                         calendarTitle: event.calendar.title,
+                        calendarID: event.calendar.calendarIdentifier,
                         calendarColor: event.calendar.cgColor,
                         location: event.location,
                         notes: event.notes,

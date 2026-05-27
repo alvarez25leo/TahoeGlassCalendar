@@ -77,13 +77,11 @@ struct QuickEventComposerView: View {
                 isAllDay = event.isAllDay
                 startDate = event.startDate
                 endDate = event.endDate
-                // Buscar calendario por título (eventIdentifier es el ID del evento,
-                // no del calendario; usamos el título como heurística).
-                if let match = calendars.first(where: { $0.title == event.calendarTitle }) {
-                    selectedCalendarID = match.id
-                } else {
-                    selectedCalendarID = defaultCalendarID ?? calendars.first?.id ?? ""
-                }
+                selectedCalendarID = Self.resolvedCalendarID(
+                    for: event,
+                    calendars: calendars,
+                    defaultCalendarID: defaultCalendarID
+                )
             } else {
                 startDate = initialDate
                 endDate = workCalendar.date(byAdding: .hour, value: 1, to: initialDate) ?? initialDate
@@ -488,6 +486,23 @@ struct QuickEventComposerView: View {
 
     private func colorOf(_ cal: CalendarSource?) -> Color {
         Color(cgColor: cal?.color ?? defaultColor)
+    }
+
+    static func resolvedCalendarID(
+        for event: CalendarEventItem,
+        calendars: [CalendarSource],
+        defaultCalendarID: String?
+    ) -> String {
+        if let calendarID = event.calendarID,
+           calendars.contains(where: { $0.id == calendarID }) {
+            return calendarID
+        }
+
+        if let match = calendars.first(where: { $0.title == event.calendarTitle }) {
+            return match.id
+        }
+
+        return defaultCalendarID ?? calendars.first?.id ?? ""
     }
 
     private var defaultColor: CGColor {

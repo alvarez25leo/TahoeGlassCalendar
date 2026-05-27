@@ -8,6 +8,7 @@ struct CalendarEventItem: Identifiable, Equatable {
     let endDate: Date
     let isAllDay: Bool
     let calendarTitle: String
+    let calendarID: String?
     let calendarColor: CGColor?
     let location: String?
     let notes: String?
@@ -20,6 +21,7 @@ struct CalendarEventItem: Identifiable, Equatable {
         lhs.endDate == rhs.endDate &&
         lhs.isAllDay == rhs.isAllDay &&
         lhs.calendarTitle == rhs.calendarTitle &&
+        lhs.calendarID == rhs.calendarID &&
         lhs.location == rhs.location &&
         lhs.notes == rhs.notes &&
         lhs.eventIdentifier == rhs.eventIdentifier
