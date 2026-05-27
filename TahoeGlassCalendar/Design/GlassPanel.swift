@@ -2,8 +2,10 @@ import SwiftUI
 
 struct GlassPanel<Content: View>: View {
     let content: Content
+    let refreshToken: Int
 
-    init(@ViewBuilder content: () -> Content) {
+    init(refreshToken: Int = 0, @ViewBuilder content: () -> Content) {
+        self.refreshToken = refreshToken
         self.content = content()
     }
 
@@ -24,6 +26,7 @@ struct GlassPanel<Content: View>: View {
                             style: .continuous
                         )
                     )
+                    .id(refreshToken)
                 }
         } else {
             content

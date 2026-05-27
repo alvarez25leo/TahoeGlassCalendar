@@ -1,11 +1,29 @@
 import SwiftUI
+import Combine
+
+final class PopoverPresentationState: ObservableObject {
+    @Published private(set) var generation = 0
+
+    func markPresented() {
+        generation += 1
+    }
+}
 
 struct CalendarPanelView: View {
     @ObservedObject var viewModel: CalendarViewModel
+    @ObservedObject var presentationState: PopoverPresentationState
+
+    init(
+        viewModel: CalendarViewModel,
+        presentationState: PopoverPresentationState = PopoverPresentationState()
+    ) {
+        self.viewModel = viewModel
+        self.presentationState = presentationState
+    }
 
     var body: some View {
         ZStack {
-            GlassPanel {
+            GlassPanel(refreshToken: presentationState.generation) {
                 Group {
                     switch viewModel.permissionState {
                     case .fullAccess:

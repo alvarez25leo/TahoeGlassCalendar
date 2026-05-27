@@ -6,12 +6,16 @@ import os
 final class PopoverController {
     private let popover: NSPopover
     private let viewModel: CalendarViewModel
+    private let presentationState = PopoverPresentationState()
     private var globalMonitor: Any?
     private var localMonitor: Any?
 
     init(viewModel: CalendarViewModel) {
         self.viewModel = viewModel
-        let rootView = CalendarPanelView(viewModel: viewModel)
+        let rootView = CalendarPanelView(
+            viewModel: viewModel,
+            presentationState: presentationState
+        )
 
         self.popover = NSPopover()
         self.popover.behavior = .transient
@@ -26,6 +30,7 @@ final class PopoverController {
         // Hace que el popover siempre tome el tamaño intrinseco del SwiftUI view
         // -> sin espacio en blanco al abrir, sin necesidad de setear contentSize fijo.
         hosting.sizingOptions = [.preferredContentSize, .intrinsicContentSize]
+        configureTransparentView(hosting.view)
         self.popover.contentViewController = hosting
     }
 
@@ -54,6 +59,14 @@ final class PopoverController {
             of: button,
             preferredEdge: .minY
         )
+
+        configurePopoverWindow()
+        presentationState.markPresented()
+
+        Task { @MainActor in
+            configurePopoverWindow()
+            presentationState.markPresented()
+        }
 
         // Subimos la ventana del popover 10px adicionales una vez mostrada,
         // para que quede mas pegada a la menu bar.
@@ -91,6 +104,32 @@ final class PopoverController {
         }
 
         AppLogger.popover.debug("Popover shown")
+    }
+
+    private func configurePopoverWindow() {
+        guard let view = popover.contentViewController?.view else { return }
+
+        configureTransparentView(view)
+        view.needsLayout = true
+        view.needsDisplay = true
+
+        guard let window = view.window else { return }
+        window.isOpaque = false
+        window.backgroundColor = .clear
+        window.hasShadow = true
+        window.invalidateShadow()
+
+        if let contentView = window.contentView {
+            configureTransparentView(contentView)
+            contentView.needsLayout = true
+            contentView.needsDisplay = true
+        }
+    }
+
+    private func configureTransparentView(_ view: NSView) {
+        view.wantsLayer = true
+        view.layer?.backgroundColor = NSColor.clear.cgColor
+        view.layer?.isOpaque = false
     }
 
     func close() {
