@@ -4,6 +4,14 @@ A small, native macOS menu bar calendar built with SwiftUI and Liquid Glass for 
 
 Tahoe Glass Calendar gives you a fast way to check your month, today's events, upcoming countdowns, and create or edit calendar events without opening Calendar.app every time.
 
+## Demo
+
+<video src="https://resourcefileswsp.s3.us-east-1.amazonaws.com/calendar-video.mov" controls width="100%">
+  Your browser does not support the video tag. You can watch the demo at https://resourcefileswsp.s3.us-east-1.amazonaws.com/calendar-video.mov.
+</video>
+
+## Full Preview
+
 ![Tahoe Glass Calendar full preview](images/full.png)
 
 ## Why This Exists
