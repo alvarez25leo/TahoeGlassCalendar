@@ -6,9 +6,9 @@ Tahoe Glass Calendar gives you a fast way to check your month, today's events, u
 
 ## Demo
 
-<video src="https://resourcefileswsp.s3.us-east-1.amazonaws.com/calendar-video.mp4" controls width="100%">
-  Your browser does not support the video tag. You can watch the demo at https://resourcefileswsp.s3.us-east-1.amazonaws.com/calendar-video.mp4.
-</video>
+[![Watch the Tahoe Glass Calendar demo](images/full.png)](https://resourcefileswsp.s3.us-east-1.amazonaws.com/calendar-video.mp4)
+
+[Watch the demo video](https://resourcefileswsp.s3.us-east-1.amazonaws.com/calendar-video.mp4)
 
 ## Full Preview
 
