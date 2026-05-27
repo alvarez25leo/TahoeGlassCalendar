@@ -3,6 +3,9 @@ import SwiftUI
 struct EventListView: View {
     let events: [CalendarEventItem]
     let pendingDeleteEventID: String?
+    let upcomingEvent: CalendarEventItem?
+    let countdownHidden: Bool
+    let onToggleCountdown: () -> Void
     let onOpenCalendar: () -> Void
     let onOpenEvent: (CalendarEventItem) -> Void
     let onCreateEvent: () -> Void
@@ -55,6 +58,12 @@ struct EventListView: View {
 
     private var footerBar: some View {
         HStack(spacing: 6) {
+            CountdownView(
+                event: upcomingEvent,
+                isHidden: countdownHidden,
+                onToggleVisibility: onToggleCountdown
+            )
+
             Spacer()
 
             if #available(macOS 26.0, *) {

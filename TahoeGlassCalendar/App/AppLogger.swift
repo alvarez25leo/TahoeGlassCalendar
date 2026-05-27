@@ -9,4 +9,5 @@ enum AppLogger {
     static let popover = Logger(subsystem: subsystem, category: "popover")
     static let opener = Logger(subsystem: subsystem, category: "opener")
     static let login = Logger(subsystem: subsystem, category: "login")
+    static let notifications = Logger(subsystem: subsystem, category: "notifications")
 }

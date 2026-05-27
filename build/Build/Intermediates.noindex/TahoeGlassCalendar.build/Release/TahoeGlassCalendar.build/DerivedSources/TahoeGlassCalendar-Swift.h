@@ -284,6 +284,7 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 @import AppKit;
 @import Foundation;
 @import ObjectiveC;
+@import UserNotifications;
 #endif
 
 #endif
@@ -312,6 +313,19 @@ SWIFT_CLASS("_TtC18TahoeGlassCalendar11AppDelegate")
 - (void)applicationDidFinishLaunching:(NSNotification * _Nonnull)notification;
 - (void)applicationWillTerminate:(NSNotification * _Nonnull)notification;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
+@class UNUserNotificationCenter;
+@class UNNotification;
+@class UNNotificationResponse;
+/// Maneja presentación foreground y acciones (Abrir / Snooze 1min) de las
+/// notificaciones de próximo evento.
+SWIFT_CLASS("_TtC18TahoeGlassCalendar20NotificationDelegate")
+@interface NotificationDelegate : NSObject <UNUserNotificationCenterDelegate>
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+- (void)userNotificationCenter:(UNUserNotificationCenter * _Nonnull)center willPresentNotification:(UNNotification * _Nonnull)notification withCompletionHandler:(void (^ _Nonnull)(UNNotificationPresentationOptions))completionHandler;
+- (void)userNotificationCenter:(UNUserNotificationCenter * _Nonnull)center didReceiveNotificationResponse:(UNNotificationResponse * _Nonnull)response withCompletionHandler:(void (^ _Nonnull)(void))completionHandler;
 @end
 
 @class NSEvent;

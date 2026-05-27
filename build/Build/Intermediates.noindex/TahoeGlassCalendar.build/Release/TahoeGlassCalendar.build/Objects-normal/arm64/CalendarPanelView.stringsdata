@@ -7,14 +7,6 @@
         "key": "",
         "location": {
           "startingColumn": 20,
-          "startingLine": 92
-        }
-      },
-      {
-        "comment": "",
-        "key": "",
-        "location": {
-          "startingColumn": 20,
           "startingLine": 95
         }
       },
@@ -72,6 +64,14 @@
         "location": {
           "startingColumn": 20,
           "startingLine": 116
+        }
+      },
+      {
+        "comment": "",
+        "key": "",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 119
         }
       }
     ]

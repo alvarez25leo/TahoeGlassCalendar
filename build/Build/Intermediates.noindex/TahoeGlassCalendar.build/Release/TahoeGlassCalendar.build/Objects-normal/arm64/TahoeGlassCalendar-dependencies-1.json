@@ -468,6 +468,13 @@
     "moduleName" : "UniformTypeIdentifiers"
   },
   {
+    "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/System\/Library\/Frameworks\/UserNotifications.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/leonardo\/Documents\/Calendar\/TahoeGlassCalendar\/build\/ModuleCache.noindex\/UserNotifications-2OO1KPM8X3R86PU35ZPL0BTEQ.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "UserNotifications"
+  },
+  {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/xpc.modulemap",
     "clangModulePath" : "\/Users\/leonardo\/Documents\/Calendar\/TahoeGlassCalendar\/build\/ModuleCache.noindex\/XPC-ECHF1KO68A2B9WB2DC8ZONYQM.pcm",
     "isBridgingHeaderDependency" : false,

@@ -7,7 +7,7 @@
         "key": "Sin eventos para este día",
         "location": {
           "startingColumn": 18,
-          "startingLine": 47
+          "startingLine": 50
         }
       },
       {
@@ -15,31 +15,31 @@
         "key": "Crear evento (⌘N)",
         "location": {
           "startingColumn": 23,
+          "startingLine": 92
+        }
+      },
+      {
+        "comment": "",
+        "key": "Abrir Calendar en esta fecha (⌘O)",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 104
+        }
+      },
+      {
+        "comment": "",
+        "key": "Crear",
+        "location": {
+          "startingColumn": 27,
           "startingLine": 83
         }
       },
       {
         "comment": "",
-        "key": "Abrir Calendar en esta fecha (⌘O)",
-        "location": {
-          "startingColumn": 23,
-          "startingLine": 95
-        }
-      },
-      {
-        "comment": "",
-        "key": "Crear",
-        "location": {
-          "startingColumn": 27,
-          "startingLine": 74
-        }
-      },
-      {
-        "comment": "",
         "key": "Abrir",
         "location": {
           "startingColumn": 27,
-          "startingLine": 86
+          "startingLine": 95
         }
       },
       {
@@ -47,7 +47,7 @@
         "key": "Crear evento (⌘N)",
         "location": {
           "startingColumn": 19,
-          "startingLine": 110
+          "startingLine": 119
         }
       },
       {
@@ -55,7 +55,7 @@
         "key": "Abrir Calendar en esta fecha (⌘O)",
         "location": {
           "startingColumn": 19,
-          "startingLine": 120
+          "startingLine": 129
         }
       },
       {
@@ -63,7 +63,7 @@
         "key": "Crear",
         "location": {
           "startingColumn": 23,
-          "startingLine": 103
+          "startingLine": 112
         }
       },
       {
@@ -71,7 +71,7 @@
         "key": "Abrir",
         "location": {
           "startingColumn": 23,
-          "startingLine": 113
+          "startingLine": 122
         }
       }
     ]

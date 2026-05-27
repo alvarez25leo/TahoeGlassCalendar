@@ -49,6 +49,9 @@ struct CalendarPanelView: View {
             EventListView(
                 events: viewModel.selectedDateEvents,
                 pendingDeleteEventID: viewModel.pendingDeleteEvent?.id,
+                upcomingEvent: viewModel.upcomingEvent,
+                countdownHidden: viewModel.countdownHidden,
+                onToggleCountdown: { viewModel.toggleCountdownHidden() },
                 onOpenCalendar: { viewModel.openCalendar() },
                 onOpenEvent: { event in viewModel.openEvent(event) },
                 onCreateEvent: { viewModel.createNewEvent() },

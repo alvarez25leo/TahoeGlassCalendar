@@ -21,6 +21,13 @@ final class CalendarViewModel: ObservableObject {
     @Published var editingEvent: CalendarEventItem?
     @Published var pendingDeleteEvent: CalendarEventItem?
 
+    /// Próximo evento "real" (timed, futuro) para countdown + notificación.
+    /// Mira primero hoy, luego días siguientes dentro de la ventana cargada.
+    @Published private(set) var upcomingEvent: CalendarEventItem?
+    @Published var countdownHidden: Bool {
+        didSet { AppPreferences.countdownHidden = countdownHidden }
+    }
+
     var composerIsPresented: Bool {
         quickAddDate != nil
     }
@@ -42,6 +49,15 @@ final class CalendarViewModel: ObservableObject {
         self.monthBuilder = monthBuilder
         self.opener = opener
         self.workCalendar = monthBuilder.calendar
+        self.countdownHidden = AppPreferences.countdownHidden
+    }
+
+    func toggleCountdownHidden() {
+        countdownHidden = !countdownHidden
+        if !countdownHidden {
+            // Al re-mostrar, pedir permiso de notificación de manera diferida.
+            Task { await NotificationScheduler.shared.requestAuthorizationIfNeeded() }
+        }
     }
 
     func bootstrap() async {
@@ -351,5 +367,28 @@ final class CalendarViewModel: ObservableObject {
             .filter { !$0.isAllDay && $0.endDate > now }
             .min(by: { $0.startDate < $1.startDate })
             ?? events.first
+
+        recomputeUpcomingEvent(now: now)
+    }
+
+    /// Próximo evento timed que aún no empezó (o está en curso). Mira hoy primero,
+    /// si no hay, busca en los gridEvents (que ya cubren el mes visible). Esto
+    /// alimenta el countdown y la notificación T-5min.
+    private func recomputeUpcomingEvent(now: Date) {
+        let candidate = gridEvents
+            .filter { !$0.isAllDay && $0.endDate > now }
+            .min(by: { $0.startDate < $1.startDate })
+
+        let previousID = upcomingEvent.map { "\($0.id).\(Int($0.startDate.timeIntervalSince1970))" }
+        let newID = candidate.map { "\($0.id).\(Int($0.startDate.timeIntervalSince1970))" }
+
+        upcomingEvent = candidate
+
+        if previousID != newID {
+            let target = candidate
+            Task { @MainActor in
+                await NotificationScheduler.shared.scheduleNotification(for: target)
+            }
+        }
     }
 }
