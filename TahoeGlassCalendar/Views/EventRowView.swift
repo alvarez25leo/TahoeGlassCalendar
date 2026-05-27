@@ -19,7 +19,7 @@ struct EventRowView: View {
                 normalRow
             }
         }
-        .animation(.easeInOut(duration: 0.18), value: isConfirmingDelete)
+        .animation(CalendarTheme.microAnimation, value: isConfirmingDelete)
     }
 
     // MARK: - Normal row
@@ -32,8 +32,8 @@ struct EventRowView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(alignment: .firstTextBaseline, spacing: 6) {
                         Text(timeLabel)
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundStyle(.secondary)
+                            .font(.system(size: 11, weight: event.isAllDay ? .semibold : .medium, design: .rounded))
+                            .foregroundStyle(event.isAllDay ? .primary : .secondary)
                             .frame(width: 78, alignment: .leading)
                             .monospacedDigit()
 
@@ -62,17 +62,21 @@ struct EventRowView: View {
 
                 Spacer(minLength: 0)
             }
-            .padding(.vertical, 6)
-            .padding(.horizontal, 8)
+            .padding(.vertical, CalendarTheme.rowPaddingV)
+            .padding(.horizontal, CalendarTheme.rowPaddingH)
             .background(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(isHovering ? Color.primary.opacity(0.06) : Color.clear)
+                RoundedRectangle(cornerRadius: CalendarTheme.rowCornerRadius, style: .continuous)
+                    .fill(isHovering ? Color.primary.opacity(CalendarTheme.rowHoverOpacity) : Color.clear)
             )
             .contentShape(Rectangle())
         }
         .buttonStyle(.pressable(scale: 0.98))
         .onHover { hovering in isHovering = hovering }
-        .animation(.spring(response: 0.22, dampingFraction: 0.75), value: isHovering)
+        .animation(CalendarTheme.pressableSpring, value: isHovering)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabelText)
+        .accessibilityHint("Doble click para abrir en Calendar. Click derecho para editar o eliminar.")
+        .accessibilityAddTraits(.isButton)
         .contextMenu {
             Button {
                 onEdit()
@@ -96,6 +100,7 @@ struct EventRowView: View {
                 .font(.system(size: 18))
                 .foregroundStyle(.red)
                 .symbolEffect(.pulse, options: .repeat(.continuous).speed(1.2))
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 1) {
                 Text("¿Eliminar \"\(event.title)\"?")
@@ -113,6 +118,7 @@ struct EventRowView: View {
                 .buttonStyle(.borderless)
                 .controlSize(.small)
                 .keyboardShortcut(.cancelAction)
+                .accessibilityLabel("Cancelar eliminación")
 
             Button(action: onConfirmDelete) {
                 Text("Eliminar")
@@ -124,16 +130,17 @@ struct EventRowView: View {
             }
             .buttonStyle(.pressable(scale: 0.92))
             .keyboardShortcut(.return, modifiers: [])
+            .accessibilityLabel("Confirmar eliminación de \(event.title)")
         }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 8)
+        .padding(.vertical, CalendarTheme.rowPaddingV)
+        .padding(.horizontal, CalendarTheme.rowPaddingH)
         .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
+            RoundedRectangle(cornerRadius: CalendarTheme.rowCornerRadius, style: .continuous)
                 .fill(Color.red.opacity(0.1))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .stroke(Color.red.opacity(0.3), lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: CalendarTheme.rowCornerRadius, style: .continuous)
+                .stroke(Color.red.opacity(0.3), lineWidth: CalendarTheme.borderStrokeWidth)
         )
     }
 
@@ -152,11 +159,22 @@ struct EventRowView: View {
             if let cg = event.calendarColor {
                 return Color(cgColor: cg)
             }
-            return Color.accentColor
+            return CalendarTheme.defaultEventColor
         }()
 
         RoundedRectangle(cornerRadius: 2, style: .continuous)
             .fill(color)
             .frame(width: 3, height: 28)
+            .accessibilityHidden(true)
+    }
+
+    private var accessibilityLabelText: String {
+        var parts: [String] = [event.title]
+        parts.append(timeLabel)
+        if let loc = event.location, !loc.isEmpty {
+            parts.append("en \(loc)")
+        }
+        parts.append("calendario \(event.calendarTitle)")
+        return parts.joined(separator: ", ")
     }
 }

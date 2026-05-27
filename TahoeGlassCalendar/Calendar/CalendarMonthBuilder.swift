@@ -20,7 +20,7 @@ final class CalendarMonthBuilder {
         // Para cada evento, listamos TODOS los dias que cubre (multi-day support).
         // hasta 3 colores únicos por día.
         var colorsByDay: [String: [CGColor]] = [:]
-        let fallbackColor = CGColor(red: 0, green: 0.48, blue: 1, alpha: 1)
+        let fallbackColor = CalendarTheme.defaultEventCGColor
 
         for event in events {
             let color = event.calendarColor ?? fallbackColor

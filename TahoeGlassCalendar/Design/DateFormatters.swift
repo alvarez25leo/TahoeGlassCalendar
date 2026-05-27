@@ -31,6 +31,23 @@ enum DateFormatters {
         return formatter
     }()
 
+    /// Para VoiceOver: "lunes 26 de mayo de 2026".
+    static let accessibleDate: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = spanish
+        formatter.dateStyle = .full
+        formatter.timeStyle = .none
+        return formatter
+    }()
+
+    /// Para grupos de búsqueda agrupados por día.
+    static let searchGroupDate: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = spanish
+        formatter.dateFormat = "EEE d MMM"
+        return formatter
+    }()
+
     static func capitalizedMonthTitle(for date: Date) -> String {
         let raw = monthTitle.string(from: date)
         guard let first = raw.first else { return raw }

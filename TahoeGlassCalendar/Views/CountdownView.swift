@@ -56,9 +56,11 @@ struct CountdownView: View {
         Button(action: onToggleVisibility) {
             HStack(spacing: 6) {
                 statusDot(state: snapshot.state, color: eventColor(for: event))
+                    .accessibilityHidden(true)
 
                 if let primary = snapshot.primaryText {
                     rollingNumber(primary)
+                        .accessibilityHidden(true)
                 }
 
                 if let suffix = snapshot.suffix {
@@ -66,15 +68,20 @@ struct CountdownView: View {
                         .font(.system(size: 10, weight: .semibold, design: .rounded))
                         .foregroundStyle(.secondary)
                         .transition(.opacity)
+                        .accessibilityHidden(true)
                 }
             }
             .padding(.horizontal, 9)
-            .frame(height: 24)
+            .frame(height: CalendarTheme.capsuleHeightSmall)
             .contentShape(Rectangle())
             .background(pillBackground(state: snapshot.state))
         }
         .buttonStyle(.pressable(scale: 0.94))
         .transition(.opacity.combined(with: .scale(scale: 0.92)))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel(for: event, snapshot: snapshot))
+        .accessibilityHint("Doble click para ocultar el contador")
+        .accessibilityAddTraits(.isButton)
         .onHover { hovering in
             isHovering = hovering
             hoverTask?.cancel()
@@ -140,6 +147,17 @@ struct CountdownView: View {
             return Color(cgColor: cg)
         }
         return .accentColor
+    }
+
+    private func accessibilityLabel(for event: CalendarEventItem, snapshot: CountdownSnapshot) -> String {
+        var parts: [String] = [snapshot.stateLabel, event.title]
+        if let primary = snapshot.primaryText {
+            parts.append(primary)
+        }
+        if let suffix = snapshot.suffix {
+            parts.append(suffix)
+        }
+        return parts.joined(separator: ", ")
     }
 
     // MARK: - Background
@@ -303,7 +321,7 @@ struct CountdownDetailCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             header
-            Divider().opacity(0.4)
+            Divider().opacity(CalendarTheme.dividerOpacity * 0.85)
             scheduleRow
             if let location = event.location, !location.isEmpty {
                 locationRow(location)
@@ -311,13 +329,13 @@ struct CountdownDetailCard: View {
             calendarRow
             if let notes = event.notes?.trimmingCharacters(in: .whitespacesAndNewlines),
                !notes.isEmpty {
-                Divider().opacity(0.3)
+                Divider().opacity(CalendarTheme.subtleDividerOpacity)
                 notesRow(notes)
             }
-            Divider().opacity(0.3)
+            Divider().opacity(CalendarTheme.subtleDividerOpacity)
             footerHint
         }
-        .padding(.horizontal, 14)
+        .padding(.horizontal, CalendarTheme.modalPaddingH)
         .padding(.vertical, 12)
         .frame(width: 280, alignment: .leading)
     }

@@ -8,27 +8,36 @@ struct EmptyEventsView: View {
     }
 
     var body: some View {
-        VStack(spacing: 8) {
+        HStack(spacing: 10) {
             Image(systemName: "calendar.badge.checkmark")
-                .font(.system(size: 26, weight: .light))
+                .font(.system(size: 18, weight: .light))
                 .foregroundStyle(.tertiary)
                 .symbolEffect(.pulse, options: .repeat(.continuous).speed(0.4))
+                .accessibilityHidden(true)
 
             Text("Sin eventos para este día")
-                .font(.system(size: 13))
+                .font(.system(size: 12))
                 .foregroundStyle(.secondary)
 
-            if let onCreateEvent = onCreateEvent {
+            Spacer()
+
+            if let onCreateEvent {
                 Button(action: onCreateEvent) {
-                    Label("Crear evento", systemImage: "plus")
+                    Label("Crear", systemImage: "plus")
                         .font(.system(size: 11, weight: .medium))
+                        .labelStyle(.iconOnly)
+                        .padding(6)
+                        .contentShape(Rectangle())
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-                .padding(.top, 2)
+                .buttonStyle(.plain)
+                .background(Circle().fill(Color.primary.opacity(CalendarTheme.subtleHoverOpacity)))
+                .help("Crear evento (⌘N)")
+                .accessibilityLabel("Crear evento")
             }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 18)
+        .frame(height: 40)
+        .padding(.horizontal, CalendarTheme.tightSpacing)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Sin eventos para este día")
     }
 }

@@ -17,6 +17,21 @@ final class MockCalendarService: CalendarServiceProtocol, @unchecked Sendable {
     ]
     var defaultID: String? = "default-cal"
 
+    let eventStoreChanges: AsyncStream<Void>
+    private let changesContinuation: AsyncStream<Void>.Continuation
+
+    init() {
+        var cont: AsyncStream<Void>.Continuation!
+        let stream = AsyncStream<Void> { c in cont = c }
+        self.eventStoreChanges = stream
+        self.changesContinuation = cont
+    }
+
+    /// Emite un evento de cambio para que el ViewModel (suscripto) reaccione.
+    func emitStoreChange() {
+        changesContinuation.yield()
+    }
+
     private(set) var fetchCallCount = 0
     private(set) var createdEvents: [NewEventDraft] = []
     private(set) var updatedEvents: [(String, NewEventDraft)] = []

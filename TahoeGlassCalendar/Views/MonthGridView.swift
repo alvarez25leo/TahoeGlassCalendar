@@ -9,7 +9,7 @@ struct MonthGridView: View {
     )
 
     var body: some View {
-        LazyVGrid(columns: columns, spacing: 4) {
+        LazyVGrid(columns: columns, spacing: CalendarTheme.dayGridSpacing) {
             ForEach(viewModel.days) { day in
                 DayCellView(
                     day: day,
@@ -21,5 +21,7 @@ struct MonthGridView: View {
                 )
             }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Grilla del mes")
     }
 }

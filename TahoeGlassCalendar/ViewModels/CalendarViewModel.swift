@@ -4,6 +4,8 @@ import os
 
 @MainActor
 final class CalendarViewModel: ObservableObject {
+    // MARK: - Estado UI publicado (derivado)
+
     @Published private(set) var permissionState: CalendarPermissionState = .notDetermined
     @Published var visibleMonth: Date = Date()
     @Published var selectedDate: Date = Date()
@@ -22,23 +24,57 @@ final class CalendarViewModel: ObservableObject {
     @Published var pendingDeleteEvent: CalendarEventItem?
 
     /// Próximo evento "real" (timed, futuro) para countdown + notificación.
-    /// Mira primero hoy, luego días siguientes dentro de la ventana cargada.
+    /// Calculado desde la única fuente de verdad: `gridEvents`.
     @Published private(set) var upcomingEvent: CalendarEventItem?
+
     @Published var countdownHidden: Bool {
         didSet { AppPreferences.countdownHidden = countdownHidden }
+    }
+
+    // MARK: - Búsqueda (quick-win pro)
+
+    @Published var searchQuery: String = ""
+    @Published private(set) var searchResults: [SearchResultGroup] = []
+    @Published var isSearchActive: Bool = false
+
+    struct SearchResultGroup: Identifiable, Equatable {
+        let id: String          // dayID
+        let date: Date
+        let events: [CalendarEventItem]
     }
 
     var composerIsPresented: Bool {
         quickAddDate != nil
     }
 
+    // MARK: - Source of truth
+
+    /// **Única fuente de verdad** para todo lo que se renderiza en el popover.
+    /// Cubre el rango de 42 días del grid del mes visible. Cuando cambia,
+    /// `selectedDateEvents`, `days`, `upcomingEvent`, `searchResults` y el
+    /// indicador de hoy se recalculan vía `rebuildDerived()`.
+    private var gridEvents: [CalendarEventItem] = []
+
+    /// Cache para el "hoy" cuando el usuario está navegando por otro mes y
+    /// `gridEvents` ya no incluye el día actual. Se invalida al cambiar de día
+    /// o al llegar `EKEventStoreChanged`.
+    private var offMonthTodayEvents: [CalendarEventItem]?
+    private var offMonthTodayDate: Date?
+
+    // MARK: - Dependencias
+
     private let calendarService: CalendarServiceProtocol
     private let monthBuilder: CalendarMonthBuilder
     private let opener: AppleCalendarOpener
     private let workCalendar: Calendar
 
-    private var gridEvents: [CalendarEventItem] = []
-    private var todayCache: (Date, [CalendarEventItem])?
+    // MARK: - Concurrencia
+
+    /// Generación monotónica para descartar fetches obsoletos (race condition al
+    /// navegar rápido entre meses). Sólo gana el último.
+    private var fetchGeneration: Int = 0
+    private var storeChangesListener: Task<Void, Never>?
+    private var searchCancellable: AnyCancellable?
 
     init(
         calendarService: CalendarServiceProtocol = CalendarService(),
@@ -50,19 +86,27 @@ final class CalendarViewModel: ObservableObject {
         self.opener = opener
         self.workCalendar = monthBuilder.calendar
         self.countdownHidden = AppPreferences.countdownHidden
+
+        // Debounce de búsqueda — evita re-filtrar en cada keystroke.
+        searchCancellable = $searchQuery
+            .removeDuplicates()
+            .debounce(for: .milliseconds(120), scheduler: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.rebuildSearchResults()
+            }
     }
 
-    func toggleCountdownHidden() {
-        countdownHidden = !countdownHidden
-        if !countdownHidden {
-            // Al re-mostrar, pedir permiso de notificación de manera diferida.
-            Task { await NotificationScheduler.shared.requestAuthorizationIfNeeded() }
-        }
+    deinit {
+        storeChangesListener?.cancel()
     }
+
+    // MARK: - Bootstrap
 
     func bootstrap() async {
         permissionState = calendarService.authorizationStatus()
         AppLogger.calendar.info("Bootstrap: permission=\(String(describing: self.permissionState), privacy: .public)")
+
+        startObservingStoreChanges()
 
         if permissionState == .notDetermined {
             return
@@ -84,42 +128,100 @@ final class CalendarViewModel: ObservableObject {
         }
     }
 
+    private func startObservingStoreChanges() {
+        guard storeChangesListener == nil else { return }
+        storeChangesListener = Task { [weak self] in
+            guard let self else { return }
+            for await _ in self.calendarService.eventStoreChanges {
+                if Task.isCancelled { return }
+                AppLogger.calendar.info("EKEventStoreChanged received → refresh")
+                // Invalidamos cache de hoy off-month porque el evento podría
+                // ser de hoy aunque no estemos viendo ese mes.
+                await self.invalidateOffMonthCache()
+                await self.refreshAll()
+            }
+        }
+    }
+
+    private func invalidateOffMonthCache() async {
+        offMonthTodayEvents = nil
+        offMonthTodayDate = nil
+    }
+
+    // MARK: - Refresh
+
     func refreshAll() async {
         guard permissionState == .fullAccess else {
-            rebuildTodayIndicator(from: nil)
+            gridEvents = []
+            rebuildDerived(now: Date())
+            return
+        }
+
+        fetchGeneration += 1
+        let myGeneration = fetchGeneration
+        isLoading = true
+
+        let gridRange = CalendarDateUtils.gridRange(for: visibleMonth, calendar: workCalendar)
+        let events = await calendarService.fetchEvents(from: gridRange.start, to: gridRange.end)
+
+        // Si otra llamada empezó después de mí, descarto este resultado.
+        guard myGeneration == fetchGeneration else {
+            AppLogger.calendar.debug("refreshAll gen=\(myGeneration) discarded (current=\(self.fetchGeneration))")
+            return
+        }
+
+        gridEvents = events
+        isLoading = false
+        rebuildDerived(now: Date())
+
+        // Si el día de hoy no está en el grid visible, refrescamos el cache
+        // off-month en background para que el menubar siga reflejándolo.
+        if !todayIsInGridRange(gridRange) {
+            Task { [weak self] in await self?.refreshOffMonthTodayCache() }
+        } else {
+            offMonthTodayEvents = nil
+            offMonthTodayDate = nil
+        }
+
+        AppLogger.calendar.debug("refreshAll: \(events.count) events in grid range")
+    }
+
+    /// Refresh ligero del indicador de hoy — usado por el timer del menubar cada
+    /// minuto. Si gridEvents cubre hoy, no hace fetch; si no, mantiene el cache.
+    func refreshTodayIndicator() async {
+        guard permissionState == .fullAccess else {
+            rebuildDerived(now: Date())
             return
         }
 
         let gridRange = CalendarDateUtils.gridRange(for: visibleMonth, calendar: workCalendar)
-        let events = await calendarService.fetchEvents(from: gridRange.start, to: gridRange.end)
-        gridEvents = events
-
-        rebuildDays()
-        rebuildSelectedDateEvents()
-        rebuildTodayIndicator(from: events)
-        AppLogger.calendar.debug("refreshAll: \(events.count) events in grid range")
+        if todayIsInGridRange(gridRange) {
+            rebuildDerived(now: Date())
+        } else {
+            await refreshOffMonthTodayCache()
+            rebuildDerived(now: Date())
+        }
     }
 
-    func refreshTodayIndicator() async {
-        guard permissionState == .fullAccess else {
-            rebuildTodayIndicator(from: nil)
-            return
-        }
-
+    private func refreshOffMonthTodayCache() async {
         let today = Date()
         let start = workCalendar.startOfDay(for: today)
         let end = workCalendar.date(byAdding: .day, value: 1, to: start) ?? today
 
         let events = await calendarService.fetchEvents(from: start, to: end)
-        todayCache = (start, events)
-
-        applyTodayIndicator(events: events)
+        offMonthTodayEvents = events
+        offMonthTodayDate = start
+        // Si seguimos en el mismo día (race), refresca el indicador.
+        rebuildDerived(now: Date())
     }
 
     func handleDayChange() async {
         AppLogger.calendar.info("Day changed: re-rendering")
+        await invalidateOffMonthCache()
         await refreshAll()
     }
+
+    // MARK: - Navegación
 
     func goToPreviousMonth() async {
         if let newMonth = workCalendar.date(byAdding: .month, value: -1, to: visibleMonth) {
@@ -143,8 +245,7 @@ final class CalendarViewModel: ObservableObject {
 
     func selectDate(_ date: Date) {
         selectedDate = date
-        rebuildDays()
-        rebuildSelectedDateEvents()
+        rebuildDerived(now: Date())
     }
 
     func moveSelection(by days: Int) async {
@@ -155,8 +256,7 @@ final class CalendarViewModel: ObservableObject {
             visibleMonth = newDate
             await refreshAll()
         } else {
-            rebuildDays()
-            rebuildSelectedDateEvents()
+            rebuildDerived(now: Date())
         }
     }
 
@@ -176,10 +276,66 @@ final class CalendarViewModel: ObservableObject {
         workCalendar.isDate(visibleMonth, equalTo: Date(), toGranularity: .month)
     }
 
-    // MARK: - Quick add
+    // MARK: - Countdown toggle
+
+    func toggleCountdownHidden() {
+        countdownHidden = !countdownHidden
+        if !countdownHidden {
+            Task { await NotificationScheduler.shared.requestAuthorizationIfNeeded() }
+        }
+    }
+
+    // MARK: - Búsqueda
+
+    func toggleSearch() {
+        isSearchActive.toggle()
+        if !isSearchActive {
+            searchQuery = ""
+            searchResults = []
+        }
+    }
+
+    func clearSearch() {
+        searchQuery = ""
+        searchResults = []
+        isSearchActive = false
+    }
+
+    private func rebuildSearchResults() {
+        let q = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !q.isEmpty else {
+            searchResults = []
+            return
+        }
+
+        let matches = gridEvents.filter { event in
+            if event.title.lowercased().contains(q) { return true }
+            if let loc = event.location?.lowercased(), loc.contains(q) { return true }
+            if let notes = event.notes?.lowercased(), notes.contains(q) { return true }
+            return false
+        }
+
+        // Agrupar por día para una lista jerárquica.
+        let grouped = Dictionary(grouping: matches) { event in
+            CalendarDateUtils.dayID(for: event.startDate, calendar: workCalendar)
+        }
+
+        searchResults = grouped
+            .compactMap { (dayID, events) -> SearchResultGroup? in
+                guard let first = events.first else { return nil }
+                let dayStart = workCalendar.startOfDay(for: first.startDate)
+                let sorted = events.sorted { lhs, rhs in
+                    if lhs.isAllDay != rhs.isAllDay { return lhs.isAllDay && !rhs.isAllDay }
+                    return lhs.startDate < rhs.startDate
+                }
+                return SearchResultGroup(id: dayID, date: dayStart, events: sorted)
+            }
+            .sorted { $0.date < $1.date }
+    }
+
+    // MARK: - Quick add / edit / delete
 
     func presentQuickAdd(on date: Date) {
-        // Refrescamos los calendarios en caso de cambios externos.
         if permissionState == .fullAccess {
             availableCalendars = calendarService.availableCalendars()
         }
@@ -203,8 +359,6 @@ final class CalendarViewModel: ObservableObject {
         quickAddError = nil
     }
 
-    /// Marca el row para mostrar confirmacion inline. NO usa NSAlert porque
-    /// abre conflicto de focus con NSPopover.transient (genera UI freeze).
     func requestDelete(_ event: CalendarEventItem) {
         pendingDeleteEvent = event
     }
@@ -214,44 +368,33 @@ final class CalendarViewModel: ObservableObject {
     }
 
     func confirmDelete(_ event: CalendarEventItem) async {
-        // Clear de inmediato para que la UI vuelva al estado normal sin esperar
-        // el round-trip de EventKit/iCloud.
         if pendingDeleteEvent?.id == event.id {
             pendingDeleteEvent = nil
         }
 
-        // Optimistic update: removemos el evento de la lista en memoria antes
-        // de que EventKit termine, para que la UI responda al instante.
+        // Optimistic update sobre la única fuente de verdad.
         gridEvents.removeAll { $0.id == event.id }
-        rebuildSelectedDateEvents()
-        rebuildDays()
+        rebuildDerived(now: Date())
 
         let id = event.eventIdentifier ?? event.id
 
         do {
             try await calendarService.deleteEvent(eventID: id)
-            // Refresh para recoger cualquier sync. Si falla, el observer de
-            // EKEventStoreChanged lo emparejará.
             await refreshAll()
         } catch {
             AppLogger.calendar.error("Delete failed: \(error.localizedDescription, privacy: .public)")
-            // Restauramos refrescando.
             await refreshAll()
         }
     }
 
     func createNewEvent() {
-        // Botón "Crear" del footer: abre el composer sobre la fecha seleccionada.
         presentQuickAdd(on: defaultQuickAddDate(for: selectedDate))
     }
 
-    /// Si el usuario clickea derecho un día, el composer arranca con hora 9-10 am
-    /// (o ahora+1h si es hoy y son después de las 9). Solo afecta la sugerencia inicial.
     func defaultQuickAddDate(for date: Date) -> Date {
         let calendar = workCalendar
         if calendar.isDateInToday(date) {
             let now = Date()
-            // Redondea a la próxima media hora.
             var comps = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: now)
             let minute = comps.minute ?? 0
             comps.minute = minute < 30 ? 30 : 0
@@ -298,7 +441,14 @@ final class CalendarViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Rebuild helpers
+    // MARK: - Derived rebuild (única fuente → todo lo demás)
+
+    private func rebuildDerived(now: Date) {
+        rebuildDays()
+        rebuildSelectedDateEvents()
+        rebuildTodayIndicator(now: now)
+        rebuildSearchResults()
+    }
 
     private func rebuildDays() {
         days = monthBuilder.buildDays(
@@ -315,7 +465,6 @@ final class CalendarViewModel: ObservableObject {
             return
         }
 
-        // Overlap real: el evento toca este dia si [start, end) intersecta [dayStart, dayEnd).
         selectedDateEvents = gridEvents
             .filter { event in
                 if event.startDate == event.endDate {
@@ -331,64 +480,69 @@ final class CalendarViewModel: ObservableObject {
             }
     }
 
-    private func rebuildTodayIndicator(from events: [CalendarEventItem]?) {
+    private func rebuildTodayIndicator(now: Date) {
         guard permissionState == .fullAccess else {
-            applyTodayIndicator(events: [])
+            todayEventCount = 0
+            hasTodayEvents = false
+            nextTodayEvent = nil
+            upcomingEvent = nil
             return
         }
 
-        let today = Date()
-        let start = workCalendar.startOfDay(for: today)
-        let end = workCalendar.date(byAdding: .day, value: 1, to: start) ?? today
+        let start = workCalendar.startOfDay(for: now)
+        let end = workCalendar.date(byAdding: .day, value: 1, to: start) ?? now
 
-        if let events = events {
-            // Overlap: incluimos eventos multi-dia que cubren hoy.
-            let todayEvents = events.filter { event in
+        // Si gridEvents cubre hoy, lo derivamos desde ahí. Si no, usamos cache
+        // off-month (alimentado por refreshOffMonthTodayCache).
+        let todayEvents: [CalendarEventItem]
+        let gridRange = CalendarDateUtils.gridRange(for: visibleMonth, calendar: workCalendar)
+        if todayIsInGridRange(gridRange) {
+            todayEvents = gridEvents.filter { event in
                 if event.startDate == event.endDate {
                     return event.startDate >= start && event.startDate < end
                 }
                 return event.startDate < end && event.endDate > start
             }
-            applyTodayIndicator(events: todayEvents)
-        } else if let cache = todayCache, workCalendar.isDate(cache.0, inSameDayAs: today) {
-            applyTodayIndicator(events: cache.1)
+        } else if let cached = offMonthTodayEvents,
+                  let cacheDate = offMonthTodayDate,
+                  workCalendar.isDate(cacheDate, inSameDayAs: now) {
+            todayEvents = cached
         } else {
-            Task { [weak self] in
-                await self?.refreshTodayIndicator()
-            }
+            todayEvents = []
         }
-    }
 
-    private func applyTodayIndicator(events: [CalendarEventItem]) {
-        let now = Date()
-        todayEventCount = events.count
-        hasTodayEvents = !events.isEmpty
-        nextTodayEvent = events
+        todayEventCount = todayEvents.count
+        hasTodayEvents = !todayEvents.isEmpty
+        nextTodayEvent = todayEvents
             .filter { !$0.isAllDay && $0.endDate > now }
             .min(by: { $0.startDate < $1.startDate })
-            ?? events.first
+            ?? todayEvents.first
 
-        recomputeUpcomingEvent(now: now)
+        recomputeUpcomingEvent(now: now, todayEvents: todayEvents)
     }
 
-    /// Próximo evento timed que aún no empezó (o está en curso). Mira hoy primero,
-    /// si no hay, busca en los gridEvents (que ya cubren el mes visible). Esto
-    /// alimenta el countdown y la notificación T-5min.
-    private func recomputeUpcomingEvent(now: Date) {
-        let candidate = gridEvents
+    /// Próximo evento timed: lo busca primero en hoy, luego en el resto del grid.
+    private func recomputeUpcomingEvent(now: Date, todayEvents: [CalendarEventItem]) {
+        let pool = gridEvents.isEmpty ? todayEvents : gridEvents
+        let candidate = pool
             .filter { !$0.isAllDay && $0.endDate > now }
             .min(by: { $0.startDate < $1.startDate })
 
-        let previousID = upcomingEvent.map { "\($0.id).\(Int($0.startDate.timeIntervalSince1970))" }
-        let newID = candidate.map { "\($0.id).\(Int($0.startDate.timeIntervalSince1970))" }
+        let previousKey = upcomingEvent.map { "\($0.id).\(Int($0.startDate.timeIntervalSince1970))" }
+        let newKey = candidate.map { "\($0.id).\(Int($0.startDate.timeIntervalSince1970))" }
 
         upcomingEvent = candidate
 
-        if previousID != newID {
+        if previousKey != newKey {
             let target = candidate
             Task { @MainActor in
                 await NotificationScheduler.shared.scheduleNotification(for: target)
             }
         }
+    }
+
+    private func todayIsInGridRange(_ range: (start: Date, end: Date)) -> Bool {
+        let now = Date()
+        return now >= range.start && now < range.end
     }
 }

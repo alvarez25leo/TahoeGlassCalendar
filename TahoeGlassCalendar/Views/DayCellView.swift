@@ -18,16 +18,21 @@ struct DayCellView: View {
                             .scaleEffect(pulse ? 1.0 : 0.92)
                             .opacity(pulse ? 1.0 : 0.85)
                     } else if isHovering && !day.isSelected {
-                        Circle().fill(Color.primary.opacity(0.08))
+                        Circle().fill(Color.primary.opacity(CalendarTheme.subtleHoverOpacity))
                     }
 
                     if day.isSelected && !day.isToday {
-                        Circle().stroke(Color.accentColor.opacity(0.7), lineWidth: 1.5)
+                        Circle()
+                            .stroke(
+                                Color.accentColor.opacity(0.7),
+                                lineWidth: CalendarTheme.selectionStrokeWidth
+                            )
                     }
 
                     Text("\(day.dayNumber)")
                         .font(.system(size: 15, weight: day.isToday ? .semibold : .regular))
                         .foregroundStyle(numberColor)
+                        .accessibilityHidden(true)
                 }
                 .frame(width: CalendarTheme.dayCircleSize, height: CalendarTheme.dayCircleSize)
 
@@ -47,7 +52,7 @@ struct DayCellView: View {
         .onHover { hovering in
             isHovering = hovering
         }
-        .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isHovering)
+        .animation(CalendarTheme.hoverSpring, value: isHovering)
         .onAppear {
             if day.isToday {
                 withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) {
@@ -64,6 +69,10 @@ struct DayCellView: View {
                 pulse = false
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabelText)
+        .accessibilityHint(accessibilityHintText)
+        .accessibilityAddTraits(day.isSelected ? [.isSelected, .isButton] : .isButton)
     }
 
     private var numberColor: Color {
@@ -76,17 +85,34 @@ struct DayCellView: View {
     @ViewBuilder
     private var dotsRow: some View {
         if day.eventColors.isEmpty {
-            Color.clear.frame(height: 4)
+            Color.clear.frame(height: CalendarTheme.dayDotSize)
         } else {
-            HStack(spacing: 2) {
+            HStack(spacing: CalendarTheme.dayDotSpacing) {
                 ForEach(0..<day.eventColors.count, id: \.self) { index in
                     Circle()
                         .fill(Color(cgColor: day.eventColors[index]))
-                        .frame(width: 4, height: 4)
+                        .frame(width: CalendarTheme.dayDotSize, height: CalendarTheme.dayDotSize)
                         .transition(.scale.combined(with: .opacity))
                 }
             }
-            .frame(height: 4)
+            .frame(height: CalendarTheme.dayDotSize)
         }
+    }
+
+    private var accessibilityLabelText: String {
+        var parts: [String] = [DateFormatters.accessibleDate.string(from: day.date)]
+        if day.isToday { parts.append("hoy") }
+        if day.isSelected { parts.append("seleccionado") }
+        if day.hasEvents {
+            let n = day.eventColors.count
+            parts.append(n == 1 ? "1 evento" : "\(n) eventos")
+        } else {
+            parts.append("sin eventos")
+        }
+        return parts.joined(separator: ", ")
+    }
+
+    private var accessibilityHintText: String {
+        "Click para seleccionar. Click derecho para crear evento."
     }
 }

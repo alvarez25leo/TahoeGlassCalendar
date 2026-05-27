@@ -55,8 +55,14 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
             }
             opener.openCalendar(at: date)
 
-        case "SNOOZE_1MIN":
-            await snooze(original: original, by: 60)
+        case "SNOOZE_5MIN":
+            await snooze(original: original, by: 5 * 60)
+
+        case "SNOOZE_15MIN":
+            await snooze(original: original, by: 15 * 60)
+
+        case "SNOOZE_1H":
+            await snooze(original: original, by: 60 * 60)
 
         case UNNotificationDismissActionIdentifier:
             break

@@ -34,23 +34,26 @@ struct CalendarPanelView: View {
                     .zIndex(10)
             }
         }
-        .animation(.spring(response: 0.28, dampingFraction: 0.86), value: viewModel.quickAddDate != nil)
+        .animation(CalendarTheme.smoothSpring, value: viewModel.quickAddDate != nil)
     }
 
     private var calendarContent: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: CalendarTheme.panelVStackSpacing) {
             CalendarHeaderView(viewModel: viewModel)
             WeekdayHeaderView()
             MonthGridView(viewModel: viewModel)
 
             Divider()
-                .opacity(0.5)
+                .opacity(CalendarTheme.dividerOpacity)
 
             EventListView(
                 events: viewModel.selectedDateEvents,
                 pendingDeleteEventID: viewModel.pendingDeleteEvent?.id,
                 upcomingEvent: viewModel.upcomingEvent,
                 countdownHidden: viewModel.countdownHidden,
+                isSearchActive: viewModel.isSearchActive,
+                searchQuery: viewModel.searchQuery,
+                searchResults: viewModel.searchResults,
                 onToggleCountdown: { viewModel.toggleCountdownHidden() },
                 onOpenCalendar: { viewModel.openCalendar() },
                 onOpenEvent: { event in viewModel.openEvent(event) },
@@ -71,8 +74,9 @@ struct CalendarPanelView: View {
     private var quickAddOverlay: some View {
         ZStack {
             // Backdrop dim + tap-to-dismiss.
-            Color.black.opacity(0.22)
+            Color.black.opacity(CalendarTheme.backdropOpacity)
                 .onTapGesture { viewModel.dismissQuickAdd() }
+                .accessibilityHidden(true)
 
             QuickEventComposerView(
                 initialDate: viewModel.quickAddDate ?? Date(),
@@ -118,7 +122,11 @@ struct CalendarPanelView: View {
 
             Button("") { viewModel.createNewEvent() }
                 .keyboardShortcut("n", modifiers: .command)
+
+            Button("") { viewModel.toggleSearch() }
+                .keyboardShortcut("f", modifiers: .command)
         }
         .buttonStyle(.plain)
+        .accessibilityHidden(true)
     }
 }

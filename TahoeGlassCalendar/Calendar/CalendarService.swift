@@ -30,6 +30,39 @@ final class CalendarService: CalendarServiceProtocol, @unchecked Sendable {
 
     var eventStore: EKEventStore { store }
 
+    // MARK: - EKEventStoreChanged → AsyncStream
+    //
+    // Convertimos la NSNotification a un AsyncStream<Void> para que el ViewModel
+    // pueda suscribirse sin acoplarse al menubar ni a NotificationCenter. Cada
+    // emisión = "alguien tocó el store; revalidá lo que tengas cacheado".
+    let eventStoreChanges: AsyncStream<Void>
+    private let changesContinuation: AsyncStream<Void>.Continuation
+    private var notificationToken: NSObjectProtocol?
+
+    init() {
+        var continuation: AsyncStream<Void>.Continuation!
+        let stream = AsyncStream<Void>(bufferingPolicy: .bufferingNewest(1)) { cont in
+            continuation = cont
+        }
+        self.eventStoreChanges = stream
+        self.changesContinuation = continuation
+
+        notificationToken = NotificationCenter.default.addObserver(
+            forName: .EKEventStoreChanged,
+            object: store,
+            queue: nil
+        ) { [weak self] _ in
+            self?.changesContinuation.yield()
+        }
+    }
+
+    deinit {
+        if let token = notificationToken {
+            NotificationCenter.default.removeObserver(token)
+        }
+        changesContinuation.finish()
+    }
+
     func authorizationStatus() -> CalendarPermissionState {
         switch EKEventStore.authorizationStatus(for: .event) {
         case .notDetermined:

@@ -28,39 +28,47 @@ struct QuickEventComposerView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
-            Divider().opacity(0.3)
+            Divider().opacity(CalendarTheme.subtleDividerOpacity)
 
             ScrollView(.vertical, showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: CalendarTheme.stackSpacing) {
                     titleField
                     locationField
                     dateSection
                     calendarSection
                     notesField
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
+                .padding(.horizontal, CalendarTheme.fieldPaddingH)
+                .padding(.vertical, CalendarTheme.modalPaddingV)
             }
 
-            if let errorMessage = errorMessage {
-                Text(errorMessage)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.red)
-                    .padding(.horizontal, 14)
-                    .padding(.bottom, 4)
+            if let errorMessage {
+                HStack(spacing: 6) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.red)
+                    Text(errorMessage)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.red)
+                        .accessibilityLabel("Error: \(errorMessage)")
+                }
+                .padding(.horizontal, CalendarTheme.modalPaddingH)
+                .padding(.bottom, CalendarTheme.tightSpacing)
             }
 
-            Divider().opacity(0.3)
+            Divider().opacity(CalendarTheme.subtleDividerOpacity)
             footer
         }
-        .frame(width: 360, height: 440)
+        .frame(width: CalendarTheme.modalWidth, height: CalendarTheme.modalHeight)
         .background(panelBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: CalendarTheme.modalCornerRadius, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: CalendarTheme.modalCornerRadius, style: .continuous)
+                .stroke(Color.primary.opacity(CalendarTheme.popoverBorderOpacity), lineWidth: CalendarTheme.borderStrokeWidth)
         )
         .shadow(color: .black.opacity(0.28), radius: 24, x: 0, y: 8)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(isEditing ? "Editar evento" : "Nuevo evento")
         .onAppear {
             if let event = editingEvent {
                 title = event.title
@@ -96,7 +104,7 @@ struct QuickEventComposerView: View {
             Color.clear
                 .glassEffect(
                     .regular,
-                    in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    in: RoundedRectangle(cornerRadius: CalendarTheme.modalCornerRadius, style: .continuous)
                 )
         } else {
             Color.clear.background(.regularMaterial)
@@ -126,8 +134,8 @@ struct QuickEventComposerView: View {
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, CalendarTheme.modalPaddingH)
+        .padding(.vertical, CalendarTheme.modalPaddingV)
     }
 
     private var headerDateString: String {
@@ -140,17 +148,22 @@ struct QuickEventComposerView: View {
         TextField("Título", text: $title)
             .textFieldStyle(.plain)
             .font(.system(size: 15, weight: .semibold))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(.horizontal, CalendarTheme.fieldPaddingH)
+            .padding(.vertical, CalendarTheme.fieldPaddingV + 1)
             .background(fieldBackground)
             .overlay(
-                RoundedRectangle(cornerRadius: 9, style: .continuous)
-                    .stroke(titleFocused ? selectedColor.opacity(0.65) : .clear, lineWidth: 1.2)
-                    .animation(.easeInOut(duration: 0.18), value: titleFocused)
+                RoundedRectangle(cornerRadius: CalendarTheme.fieldCornerRadius, style: .continuous)
+                    .stroke(
+                        titleFocused ? selectedColor.opacity(0.65) : .clear,
+                        lineWidth: CalendarTheme.focusStrokeWidth
+                    )
+                    .animation(CalendarTheme.microAnimation, value: titleFocused)
             )
             .focused($titleFocused)
             .submitLabel(.done)
             .onSubmit { Task { await save() } }
+            .accessibilityLabel("Título del evento")
+            .disabled(isSaving)
     }
 
     private var locationField: some View {
@@ -158,13 +171,16 @@ struct QuickEventComposerView: View {
             Image(systemName: "mappin.circle")
                 .font(.system(size: 12))
                 .foregroundStyle(.tertiary)
+                .accessibilityHidden(true)
 
             TextField("Agregar ubicación", text: $location)
                 .textFieldStyle(.plain)
                 .font(.system(size: 12))
+                .accessibilityLabel("Ubicación")
+                .disabled(isSaving)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 9)
+        .padding(.horizontal, CalendarTheme.fieldPaddingH)
+        .padding(.vertical, CalendarTheme.fieldPaddingV)
         .background(fieldBackground)
     }
 
@@ -188,9 +204,10 @@ struct QuickEventComposerView: View {
                 timedDateRows
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 9)
+        .padding(.horizontal, CalendarTheme.fieldPaddingH)
+        .padding(.vertical, CalendarTheme.fieldPaddingV)
         .background(fieldBackground)
+        .disabled(isSaving)
     }
 
     private var allDayDateRow: some View {
@@ -286,11 +303,14 @@ struct QuickEventComposerView: View {
                     .font(.system(size: 9, weight: .medium))
                     .foregroundStyle(.tertiary)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 9)
+            .padding(.horizontal, CalendarTheme.fieldPaddingH)
+            .padding(.vertical, CalendarTheme.fieldPaddingV)
             .background(fieldBackground)
         }
         .buttonStyle(.plain)
+        .disabled(isSaving)
+        .accessibilityLabel("Calendario seleccionado: \(selected?.title ?? "ninguno")")
+        .accessibilityHint("Doble click para cambiar de calendario")
         .popover(isPresented: $showCalendarPicker, arrowEdge: .top) {
             calendarPickerPopover
         }
@@ -356,15 +376,18 @@ struct QuickEventComposerView: View {
                 Text("Notas, URL…")
                     .font(.system(size: 12))
                     .foregroundStyle(.tertiary)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
+                    .padding(.horizontal, CalendarTheme.fieldPaddingH)
+                    .padding(.vertical, CalendarTheme.fieldPaddingV + 3)
                     .allowsHitTesting(false)
+                    .accessibilityHidden(true)
             }
             TextEditor(text: $notes)
                 .font(.system(size: 12))
                 .scrollContentBackground(.hidden)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
+                .padding(.horizontal, CalendarTheme.fieldPaddingH - 4)
+                .padding(.vertical, CalendarTheme.tightSpacing)
+                .accessibilityLabel("Notas del evento")
+                .disabled(isSaving)
         }
         .frame(height: 52)
         .background(fieldBackground)
@@ -380,8 +403,8 @@ struct QuickEventComposerView: View {
                 Text("Cancelar")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.primary)
-                    .padding(.horizontal, 14)
-                    .frame(height: 26)
+                    .padding(.horizontal, CalendarTheme.modalPaddingH)
+                    .frame(height: CalendarTheme.capsuleHeight)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.pressable(scale: 0.94))
@@ -400,7 +423,7 @@ struct QuickEventComposerView: View {
                         .foregroundStyle(.white)
                 }
                 .padding(.horizontal, 16)
-                .frame(height: 26)
+                .frame(height: CalendarTheme.capsuleHeight)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.pressable(scale: 0.94))
@@ -410,8 +433,8 @@ struct QuickEventComposerView: View {
             .opacity(canSave ? 1 : 0.55)
             .animation(.easeInOut(duration: 0.2), value: canSave)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, CalendarTheme.modalPaddingH)
+        .padding(.vertical, CalendarTheme.modalPaddingV)
     }
 
     @ViewBuilder
@@ -468,12 +491,12 @@ struct QuickEventComposerView: View {
     }
 
     private var defaultColor: CGColor {
-        CGColor(red: 0, green: 0.48, blue: 1, alpha: 1)
+        CalendarTheme.defaultEventCGColor
     }
 
     @ViewBuilder
     private var fieldBackground: some View {
-        RoundedRectangle(cornerRadius: 9, style: .continuous)
-            .fill(Color.primary.opacity(0.05))
+        RoundedRectangle(cornerRadius: CalendarTheme.fieldCornerRadius, style: .continuous)
+            .fill(Color.primary.opacity(CalendarTheme.fieldFillOpacity))
     }
 }

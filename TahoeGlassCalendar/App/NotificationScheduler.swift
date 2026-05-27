@@ -32,14 +32,24 @@ final class NotificationScheduler {
             title: "Abrir en Calendar",
             options: [.foreground]
         )
-        let snoozeAction = UNNotificationAction(
-            identifier: "SNOOZE_1MIN",
-            title: "Recordar en 1 min",
+        let snooze5 = UNNotificationAction(
+            identifier: "SNOOZE_5MIN",
+            title: "Recordar en 5 min",
+            options: []
+        )
+        let snooze15 = UNNotificationAction(
+            identifier: "SNOOZE_15MIN",
+            title: "Recordar en 15 min",
+            options: []
+        )
+        let snooze1h = UNNotificationAction(
+            identifier: "SNOOZE_1H",
+            title: "Recordar en 1 hora",
             options: []
         )
         let category = UNNotificationCategory(
             identifier: categoryID,
-            actions: [openAction, snoozeAction],
+            actions: [openAction, snooze5, snooze15, snooze1h],
             intentIdentifiers: [],
             options: []
         )

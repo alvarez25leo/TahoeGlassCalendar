@@ -14,16 +14,18 @@ final class StatusBarController: NSObject, NSMenuDelegate {
 
     private var cancellables = Set<AnyCancellable>()
     private var refreshTimer: Timer?
-    private var eventStoreObserver: NSObjectProtocol?
     private var dayChangeObserver: NSObjectProtocol?
 
     private var lastIconHasDot: Bool?
+    private var lastUpcomingLabel: String?
+
+    /// Ventana de tiempo desde "ahora" para mostrar el evento en el menubar.
+    private let upcomingDisplayWindow: TimeInterval = 90 * 60
 
     func start() {
         configureStatusItem()
         bindViewModel()
         startRefreshTimer()
-        observeEventStoreChanges()
         observeDayChange()
 
         Task {
@@ -34,11 +36,6 @@ final class StatusBarController: NSObject, NSMenuDelegate {
     func stop() {
         refreshTimer?.invalidate()
         refreshTimer = nil
-
-        if let observer = eventStoreObserver {
-            NotificationCenter.default.removeObserver(observer)
-            eventStoreObserver = nil
-        }
 
         if let observer = dayChangeObserver {
             NotificationCenter.default.removeObserver(observer)
@@ -51,8 +48,6 @@ final class StatusBarController: NSObject, NSMenuDelegate {
     // MARK: - Setup
 
     private func configureStatusItem() {
-        // autosaveName hace que macOS recuerde la posicion en que el usuario
-        // colocó el icono (Cmd + drag). Sin esto, vuelve al final cada launch.
         statusItem.autosaveName = "TahoeGlassCalendarStatusItem"
         statusItem.behavior = .removalAllowed
 
@@ -84,6 +79,14 @@ final class StatusBarController: NSObject, NSMenuDelegate {
             self?.updateTooltip(count: count, next: next)
         }
         .store(in: &cancellables)
+
+        // Texto del próximo evento al lado del icono (configurable).
+        viewModel.$upcomingEvent
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
+                self?.updateUpcomingLabel(event: event)
+            }
+            .store(in: &cancellables)
     }
 
     private func updateStatusIcon(hasEvents: Bool) {
@@ -108,27 +111,73 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         }
     }
 
+    /// Muestra "Título · HH:MM" junto al icono cuando hay un evento timed dentro
+    /// de los próximos 90 minutos y la preferencia está activa. Se hace render
+    /// con NSAttributedString para mantener el ancho compacto y respetar el
+    /// look del menubar (sistema, color adaptable, ligadura monoespaciada en la
+    /// hora).
+    private func updateUpcomingLabel(event: CalendarEventItem?) {
+        guard let button = statusItem.button else { return }
+
+        let label = composeUpcomingLabel(event: event)
+
+        // Evitamos reasignar attributedTitle si no cambió (no hay parpadeo).
+        if label == lastUpcomingLabel { return }
+        lastUpcomingLabel = label
+
+        if let label {
+            let attr = NSAttributedString(
+                string: " " + label,
+                attributes: [
+                    .font: NSFont.systemFont(ofSize: 12, weight: .medium),
+                    .foregroundColor: NSColor.labelColor
+                ]
+            )
+            button.attributedTitle = attr
+            button.imagePosition = .imageLeading
+        } else {
+            button.attributedTitle = NSAttributedString(string: "")
+            button.title = ""
+            button.imagePosition = .imageOnly
+        }
+    }
+
+    private func composeUpcomingLabel(event: CalendarEventItem?) -> String? {
+        guard AppPreferences.showUpcomingInMenuBar,
+              let event,
+              !event.isAllDay else { return nil }
+
+        let now = Date()
+        let delta = event.startDate.timeIntervalSince(now)
+        guard delta > -300, delta < upcomingDisplayWindow else { return nil }
+
+        let title = event.title.count > 22
+            ? String(event.title.prefix(22)) + "…"
+            : event.title
+
+        if delta <= 0 {
+            return "\(title) · ahora"
+        }
+        let mins = Int(delta / 60)
+        if mins < 60 {
+            return "\(title) · en \(mins)m"
+        }
+        let time = DateFormatters.eventTime.string(from: event.startDate)
+        return "\(title) · \(time)"
+    }
+
     private func startRefreshTimer() {
-        refreshTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+        // Cada 30s actualiza el indicador y la etiqueta "en Nm" del menubar.
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 await self?.viewModel.refreshTodayIndicator()
+                // Forzar recomputo del label aunque el evento no cambió.
+                self?.lastUpcomingLabel = nil
+                self?.updateUpcomingLabel(event: self?.viewModel.upcomingEvent)
             }
         }
         if let timer = refreshTimer {
             RunLoop.main.add(timer, forMode: .common)
-        }
-    }
-
-    private func observeEventStoreChanges() {
-        eventStoreObserver = NotificationCenter.default.addObserver(
-            forName: .EKEventStoreChanged,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            AppLogger.menubar.info("EKEventStoreChanged received")
-            Task { @MainActor in
-                await self?.viewModel.refreshAll()
-            }
         }
     }
 
@@ -165,7 +214,6 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         guard let button = statusItem.button else { return }
         popoverController.toggle(relativeTo: button)
 
-        // Refresh en background después de mostrar -> SwiftUI re-renderiza solo.
         if popoverController.isShown {
             Task { @MainActor in
                 await viewModel.refreshAll()
@@ -197,6 +245,15 @@ final class StatusBarController: NSObject, NSMenuDelegate {
 
         menu.addItem(NSMenuItem.separator())
 
+        let upcomingItem = NSMenuItem(
+            title: "Mostrar próximo evento en la barra",
+            action: #selector(menuToggleUpcomingInMenuBar),
+            keyEquivalent: ""
+        )
+        upcomingItem.target = self
+        upcomingItem.state = AppPreferences.showUpcomingInMenuBar ? .on : .off
+        menu.addItem(upcomingItem)
+
         launchAtLogin.refresh()
         let loginItem = NSMenuItem(
             title: "Iniciar al iniciar sesión",
@@ -227,8 +284,6 @@ final class StatusBarController: NSObject, NSMenuDelegate {
 
         statusItem.menu = menu
         statusItem.button?.performClick(nil)
-        // NSMenuDelegate.menuDidClose vuelve a poner statusItem.menu = nil
-        // para que el próximo click reciba la acción normal.
     }
 
     nonisolated func menuDidClose(_ menu: NSMenu) {
@@ -249,6 +304,12 @@ final class StatusBarController: NSObject, NSMenuDelegate {
 
     @objc private func menuToggleLaunchAtLogin() {
         launchAtLogin.toggle()
+    }
+
+    @objc private func menuToggleUpcomingInMenuBar() {
+        AppPreferences.showUpcomingInMenuBar.toggle()
+        lastUpcomingLabel = nil
+        updateUpcomingLabel(event: viewModel.upcomingEvent)
     }
 
     @objc private func menuAbout() {
