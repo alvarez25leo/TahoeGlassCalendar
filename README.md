@@ -10,10 +10,6 @@ Tahoe Glass Calendar gives you a fast way to check your month, today's events, u
 
 [Watch the demo video](https://resourcefileswsp.s3.us-east-1.amazonaws.com/calendar-video.mp4)
 
-## Full Preview
-
-![Tahoe Glass Calendar full preview](images/full.png)
-
 ## Why This Exists
 
 macOS Calendar is powerful, but it can feel heavy when all you need is a quick glance at your day. Tahoe Glass Calendar was built to solve that tiny but constant friction:
