@@ -45,6 +45,10 @@ final class PopoverController {
     }
 
     func show(relativeTo button: NSStatusBarButton) {
+        // Liquid Glass necesita una ventana activa/key para resolver el efecto
+        // desde el primer frame; si no, AppKit lo recompone al primer click.
+        NSApp.activate(ignoringOtherApps: true)
+
         // Encogemos el rect de anclaje desde abajo: el popover se ancla al borde
         // minY del rect, asi que subir ese borde acerca el panel a la menu bar.
         let anchor = NSRect(
@@ -61,10 +65,12 @@ final class PopoverController {
         )
 
         configurePopoverWindow()
+        activatePopoverWindow()
         presentationState.markPresented()
 
         Task { @MainActor in
             configurePopoverWindow()
+            activatePopoverWindow()
             presentationState.markPresented()
         }
 
@@ -75,9 +81,6 @@ final class PopoverController {
             frame.origin.y += 7
             popoverWindow.setFrameOrigin(frame.origin)
         }
-
-        // Activamos brevemente la app para que el popover capture eventos de teclado.
-        NSApp.activate(ignoringOtherApps: true)
 
         globalMonitor = NSEvent.addGlobalMonitorForEvents(
             matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]
@@ -121,9 +124,21 @@ final class PopoverController {
 
         if let contentView = window.contentView {
             configureTransparentView(contentView)
+            contentView.layoutSubtreeIfNeeded()
+            contentView.displayIfNeeded()
             contentView.needsLayout = true
             contentView.needsDisplay = true
         }
+    }
+
+    private func activatePopoverWindow() {
+        guard let window = popover.contentViewController?.view.window else { return }
+
+        window.makeKey()
+        window.orderFrontRegardless()
+        window.acceptsMouseMovedEvents = true
+        window.contentView?.layoutSubtreeIfNeeded()
+        window.contentView?.displayIfNeeded()
     }
 
     private func configureTransparentView(_ view: NSView) {
