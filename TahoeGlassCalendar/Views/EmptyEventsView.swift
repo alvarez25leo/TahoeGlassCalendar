@@ -26,11 +26,11 @@ struct EmptyEventsView: View {
                     Label("Crear", systemImage: "plus")
                         .font(.system(size: 11, weight: .medium))
                         .labelStyle(.iconOnly)
-                        .padding(6)
+                        .frame(width: CalendarTheme.capsuleHeightSmall, height: CalendarTheme.capsuleHeightSmall)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
-                .background(Circle().fill(Color.primary.opacity(CalendarTheme.subtleHoverOpacity)))
+                .buttonStyle(.pressable(scale: 0.9))
+                .background(createButtonBackground)
                 .help("Crear evento (⌘N)")
                 .accessibilityLabel("Crear evento")
             }
@@ -39,5 +39,17 @@ struct EmptyEventsView: View {
         .padding(.horizontal, CalendarTheme.tightSpacing)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Sin eventos para este día")
+    }
+
+    @ViewBuilder
+    private var createButtonBackground: some View {
+        if #available(macOS 26.0, *) {
+            Circle()
+                .fill(.clear)
+                .glassEffect(.regular.interactive(), in: Circle())
+        } else {
+            Circle()
+                .fill(Color.primary.opacity(CalendarTheme.subtleHoverOpacity))
+        }
     }
 }
