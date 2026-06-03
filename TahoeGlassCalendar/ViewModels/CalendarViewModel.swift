@@ -18,6 +18,11 @@ final class CalendarViewModel: ObservableObject {
     @Published private(set) var isLoading: Bool = false
 
     @Published private(set) var availableCalendars: [CalendarSource] = []
+
+    /// `true` cuando el sistema no tiene conexión de red. Se usa para mostrar el
+    /// aviso de "sin sincronización" en el header. Derivado de `NetworkMonitor`.
+    @Published private(set) var isOffline: Bool = false
+
     @Published var quickAddDate: Date?
     @Published var quickAddError: String?
     @Published var editingEvent: CalendarEventItem?
@@ -79,6 +84,8 @@ final class CalendarViewModel: ObservableObject {
     private var searchFetchGeneration: Int = 0
     private var storeChangesListener: Task<Void, Never>?
     private var searchCancellable: AnyCancellable?
+    private let networkMonitor = NetworkMonitor()
+    private var networkCancellable: AnyCancellable?
 
     private let searchMonthRadius = 3
 
@@ -99,6 +106,14 @@ final class CalendarViewModel: ObservableObject {
             .debounce(for: .milliseconds(120), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.rebuildSearchResults()
+            }
+
+        // Estado de conectividad → bandera para el aviso de sincronización.
+        networkCancellable = networkMonitor.$isConnected
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] connected in
+                self?.isOffline = !connected
             }
     }
 

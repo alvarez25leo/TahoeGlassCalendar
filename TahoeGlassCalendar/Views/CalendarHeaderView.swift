@@ -17,6 +17,11 @@ struct CalendarHeaderView: View {
                     .foregroundStyle(.primary)
                     .accessibilityAddTraits(.isHeader)
 
+                if viewModel.isOffline {
+                    offlineBadge
+                        .transition(.opacity.combined(with: .scale(scale: 0.7)))
+                }
+
                 Spacer()
 
                 if #available(macOS 26.0, *) {
@@ -37,6 +42,21 @@ struct CalendarHeaderView: View {
             }
         }
         .animation(CalendarTheme.smoothSpring, value: viewModel.isSearchActive)
+        .animation(CalendarTheme.smoothSpring, value: viewModel.isOffline)
+    }
+
+    // MARK: - Offline badge
+
+    /// Aviso de "sin conexión": iCloud/CalDAV no sincroniza, así que los eventos
+    /// podrían estar desactualizados. Tooltip explica el motivo al pasar el mouse.
+    private var offlineBadge: some View {
+        Image(systemName: "exclamationmark.triangle.fill")
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundStyle(.orange)
+            .symbolRenderingMode(.hierarchical)
+            .help("Sin conexión a internet — los eventos podrían no estar sincronizados.")
+            .accessibilityLabel("Sin conexión a internet")
+            .accessibilityHint("Los eventos podrían no estar sincronizados.")
     }
 
     // MARK: - Search
